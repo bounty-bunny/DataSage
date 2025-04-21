@@ -38,18 +38,15 @@ elif menu_option == "Connect SQL":
         sqlite_file = st.file_uploader("Upload SQLite DB", type="db")
         if sqlite_file:
             try:
-                with open("temp.db", "wb") as f:
-                    f.write(sqlite_file.getbuffer())
-                conn = sqlite3.connect("temp.db")
+                conn = sqlite3.connect(sqlite_file.name)
                 cursor = conn.cursor()
                 tables = [row[0] for row in cursor.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
-                if tables:
-                    table = st.selectbox("Select Table", tables)
-                    if table:
-                        df = pd.read_sql_query(f"SELECT * FROM {table}", conn)
-                        st.session_state.df = df
-                        st.success("Data fetched!")
-                        st.dataframe(df)
+                table = st.selectbox("Select Table", tables)
+                if table:
+                    df = pd.read_sql_query(f"SELECT * FROM {table}", conn)
+                    st.session_state.df = df
+                    st.success("Data fetched!")
+                    st.dataframe(df)
             except Exception as e:
                 st.error(f"SQLite Error: {e}")
     else:
@@ -59,8 +56,7 @@ elif menu_option == "Connect SQL":
         user = st.text_input("User")
         password = st.text_input("Password", type="password")
 
-        connect_button = st.button("Connect")
-        if connect_button:
+        if st.button("Connect"):
             try:
                 if db_type == "PostgreSQL":
                     engine = sqlalchemy.create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}")
@@ -69,23 +65,23 @@ elif menu_option == "Connect SQL":
 
                 inspector = sqlalchemy.inspect(engine)
                 tables = inspector.get_table_names()
-                if tables:
-                    table = st.selectbox("Select Table", tables)
-                    if table:
-                        df = pd.read_sql(f"SELECT * FROM {table} LIMIT 100", engine)
-                        st.session_state.df = df
-                        st.success("Connected and Data Loaded!")
-                        st.dataframe(df)
+                table = st.selectbox("Select Table", tables)
+
+                if table:
+                    df = pd.read_sql(f"SELECT * FROM {table} LIMIT 100", engine)
+                    st.session_state.df = df
+                    st.success("Connected and Data Loaded!")
+                    st.dataframe(df)
             except Exception as e:
                 st.error(f"Connection Error: {e}")
 
 # Display export/save options
 if st.session_state.df is not None:
     st.sidebar.subheader("💾 Save / Export")
-    csv = st.session_state.df.to_csv(index=False).encode("utf-8")
-    st.sidebar.download_button(
-        label="Download CSV",
-        data=csv,
-        file_name="data_export.csv",
-        mime="text/csv"
-    )
+    if st.sidebar.button("Export as CSV"):
+        st.sidebar.download_button(
+            label="Download CSV",
+            data=st.session_state.df.to_csv(index=False),
+            file_name="data_export.csv",
+            mime="text/csv"
+        )
