@@ -1,6 +1,11 @@
 streamlit
 pandas
 sqlalchemy
+sqlite3
+pandas-profiling
+streamlit-pandas-profiling
+seaborn
+matplotlib
 openpyxl
-mysql-connector-python
 psycopg2-binary
+mysql-connector-python
