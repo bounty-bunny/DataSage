@@ -80,12 +80,12 @@ else:
                     st.error(f"Connection Error: {e}")
 
     # Display export/save options
-    if st.session_state.df is not None:
-        st.sidebar.subheader("💾 Save / Export")
-        if st.sidebar.button("Export as CSV"):
-            st.sidebar.download_button(
-                label="Download CSV",
-                data=st.session_state.df.to_csv(index=False),
-                file_name="data_export.csv",
-                mime="text/csv"
-            )
+if st.session_state.df is not None:
+    st.sidebar.subheader("💾 Save / Export")
+    if st.sidebar.button("Export as CSV"):
+        st.sidebar.download_button(
+            label="Download CSV",
+            data=st.session_state.df.to_csv(index=False),
+            file_name="data_export.csv",
+            mime="text/csv"
+        )
