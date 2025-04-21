@@ -2,13 +2,23 @@ import streamlit as st
 import pandas as pd
 import sqlalchemy
 import sqlite3
+import seaborn as sns
+import matplotlib.pyplot as plt
+from pandas_profiling import ProfileReport
+from streamlit_pandas_profiling import st_profile_report
 
 st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
-st.title("📊 DataSage – Smart Data Uploader & Connector")
+st.title("📊 DataSage – Smart Data Uploader & Analyzer")
 
 # Sidebar Menu
-st.sidebar.header("📂 Upload or Connect")
-menu_option = st.sidebar.radio("Choose Data Source", ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)"])
+st.sidebar.header("📂 Data Operations")
+menu_option = st.sidebar.radio("Choose Operation", [
+    "Upload File", 
+    "Connect SQL", 
+    "Data Profiling", 
+    "Visualize Data", 
+    "Download Data"
+])
 
 # Session cache
 if "df" not in st.session_state:
@@ -75,13 +85,50 @@ elif menu_option == "Connect SQL":
             except Exception as e:
                 st.error(f"Connection Error: {e}")
 
-# Display export/save options
-if st.session_state.df is not None:
-    st.sidebar.subheader("💾 Save / Export")
-    if st.sidebar.button("Export as CSV"):
-        st.sidebar.download_button(
+# Data Profiling
+elif menu_option == "Data Profiling":
+    if st.session_state.df is not None:
+        st.subheader("🔎 Data Profiling Report")
+        profile = ProfileReport(st.session_state.df, minimal=True)
+        st_profile_report(profile)
+    else:
+        st.warning("No data loaded. Please upload or connect to a dataset.")
+
+# Visualizations
+elif menu_option == "Visualize Data":
+    if st.session_state.df is not None:
+        st.subheader("📈 Data Visualization")
+        columns = st.multiselect("Select Columns", st.session_state.df.columns)
+
+        if len(columns) == 1:
+            col = columns[0]
+            fig, ax = plt.subplots()
+            sns.histplot(st.session_state.df[col].dropna(), kde=True, ax=ax)
+            st.pyplot(fig)
+
+        elif len(columns) == 2:
+            x, y = columns
+            fig, ax = plt.subplots()
+            sns.scatterplot(data=st.session_state.df, x=x, y=y, ax=ax)
+            st.pyplot(fig)
+
+        if st.checkbox("Show Correlation Heatmap"):
+            corr = st.session_state.df.select_dtypes(include='number').corr()
+            fig, ax = plt.subplots()
+            sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
+            st.pyplot(fig)
+    else:
+        st.warning("No data loaded. Please upload or connect to a dataset.")
+
+# Download
+elif menu_option == "Download Data":
+    if st.session_state.df is not None:
+        st.sidebar.subheader("💾 Save / Export")
+        st.download_button(
             label="Download CSV",
             data=st.session_state.df.to_csv(index=False),
             file_name="data_export.csv",
             mime="text/csv"
         )
+    else:
+        st.warning("No data loaded to download.")
