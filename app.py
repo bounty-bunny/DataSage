@@ -1,9 +1,9 @@
-    import streamlit as st
-    import pandas as pd
-    import sqlalchemy
-    import sqlite3
+import streamlit as st
+import pandas as pd
+import sqlalchemy
+import sqlite3
 except ModuleNotFoundError as e:
-    import sys
+import sys
     sys.stderr.write("Required module is not installed: {}\n".format(e))
     sys.stderr.write("Please ensure you're running this script in an environment with Streamlit and related dependencies installed.\n")
 else:
