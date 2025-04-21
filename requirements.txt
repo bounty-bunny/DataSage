@@ -8,4 +8,4 @@ matplotlib==3.5.3
 openpyxl==3.1.2
 psycopg2-binary==2.9.9
 mysql-connector-python==8.3.0
-pydantic<2
+pydantic==1.10.7  # Specific version of pydantic
