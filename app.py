@@ -10,7 +10,10 @@ st.title("📊 DataSage – Smart Data Uploader & Profiler")
 
 # Sidebar Menu
 st.sidebar.header("📂 Upload or Connect")
-menu_option = st.sidebar.radio("Choose Data Source", ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)"])
+menu_option = st.sidebar.radio(
+    "Choose Data Source",
+    ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)", "Data Insights"]
+)
 
 # Session cache
 if "df" not in st.session_state:
@@ -67,7 +70,23 @@ elif menu_option == "Connect SQL":
                 st.session_state.df = df
                 st.success("Connected and Data Loaded!")
                 st.dataframe(df)
+        elif menu_option == "Data Insights":
+    st.subheader("📈 Automated EDA Report with Sweetviz")
 
+    if st.session_state.df is not None:
+        df = st.session_state.df
+
+        with st.spinner("Generating report..."):
+            report = sv.analyze(df)
+            report.show_html(filepath="sweetviz_report.html", open_browser=False)
+
+            with open("sweetviz_report.html", "r", encoding="utf-8") as f:
+                html_report = f.read()
+
+            st.components.v1.html(html_report, height=1000, scrolling=True)
+    else:
+        st.warning("Please upload or connect to a dataset first.")
+        
 # Profiling & Export
 if st.session_state.df is not None:
     st.sidebar.subheader("🔍 Analyze & Export")
