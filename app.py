@@ -38,11 +38,16 @@ def login():
         password = st.text_input("Password", type="password", key="login_password")
 
         if st.button("Login", key="login_button"):
-            if check_user(username, password):
-                st.session_state.authenticated = True
-                st.success("Logged in successfully!")
+            conn = create_connection('your_database.db')  # Make sure the database path is correct
+            if conn:
+                user = check_user(conn, username)
+                if user and user[1] == password:  # Assuming the second field is the password
+                    st.session_state.authenticated = True
+                    st.success("Logged in successfully!")
+                else:
+                    st.error("Incorrect username or password.")
             else:
-                st.error("Incorrect username or password.")
+                st.error("Failed to connect to the database.")
 
 # Main flow: Check if user is authenticated
 if not st.session_state.authenticated:
