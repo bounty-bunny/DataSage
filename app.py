@@ -39,7 +39,7 @@ def login():
         username = st.text_input("Username", key="login_username")
         password = st.text_input("Password", type="password", key="login_password")
 
-        if st.button("Login", key="login_button"):
+        if st.button("DataSage", key="login_button"):
             if username in st.session_state.users and st.session_state.users[username] == password:
                 st.session_state.authenticated = True
                 st.success("Logged in successfully!")
