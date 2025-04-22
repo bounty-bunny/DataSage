@@ -1,15 +1,12 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import sweetviz as sv
-import plotly.express as px
-import sqlite3
 import sqlalchemy
+import sqlite3
+import sweetviz as sv
+import numpy as np
+import plotly.express as px
+import requests
 from requests.auth import HTTPBasicAuth
-
-# Streamlit Page Configuration
-st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
-st.title("📊 DataSage – Smart Data Uploader & Connector")
 
 # In-memory user storage (for demo purposes)
 if 'users' not in st.session_state:
@@ -51,16 +48,12 @@ if 'authenticated' not in st.session_state:
 
 # Main flow: Check if user is authenticated
 if not st.session_state.authenticated:
-    # Two buttons to toggle between login and signup
-    login_button, sign_up_button = st.columns(2)
+    # Show login form
+    login()
 
-    with login_button:
-        if st.button("Login"):
-            login()
-
-    with sign_up_button:
-        if st.button("Sign Up"):
-            sign_up()
+    # Button to show Sign Up form
+    if st.button("Sign Up"):
+        sign_up()
 
 else:
     # Session cache
@@ -190,4 +183,36 @@ else:
         st.subheader("🔌 ServiceNow Data Fetch")
         def fetch_servicenow_data():
             url = "https://your-instance.service-now.com/api/now/table/incident"
-            auth = HTTPBasicAuth('username', 'password')  #
+            auth = HTTPBasicAuth('username', 'password')  # Replace with ServiceNow credentials
+            headers = {"Accept": "application/json"}
+
+            response = requests.get(url, auth=auth, headers=headers)
+            if response.status_code == 200:
+                incidents = response.json()['result']
+                return pd.DataFrame(incidents)
+            else:
+                st.error("Error fetching data from ServiceNow")
+                return None
+        
+        df = fetch_servicenow_data()
+        if df is not None:
+            st.write("Fetched Data from ServiceNow:")
+            st.dataframe(df)
+
+    # Display export/save options
+    if st.session_state.df is not None:
+        st.sidebar.subheader("💾 Save / Export")
+        if st.sidebar.button("Export as CSV"):
+            st.sidebar.download_button(
+                label="Download CSV",
+                data=st.session_state.df.to_csv(index=False),
+                file_name="data_export.csv",
+                mime="text/csv"
+            )
+        if st.sidebar.button("Export as Excel"):
+            st.sidebar.download_button(
+                label="Download Excel",
+                data=st.session_state.df.to_excel(index=False),
+                file_name="data_export.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
