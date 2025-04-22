@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
-import sqlalchemy
-import sqlite3
-import sweetviz as sv
 import numpy as np
 import plotly.express as px
+import sweetviz as sv
+import sqlite3
+import sqlalchemy
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -15,13 +15,13 @@ if 'users' not in st.session_state:
 # Helper functions for Sign Up and Login
 def sign_up():
     st.subheader("📋 Sign Up")
-    username = st.text_input("Create Username")
-    password = st.text_input("Create Password", type="password")
-    confirm_password = st.text_input("Confirm Password", type="password")
+    username = st.text_input("Create Username", key="signup_username")
+    password = st.text_input("Create Password", type="password", key="signup_password")
+    confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password")
 
     if password != confirm_password:
         st.error("Passwords do not match.")
-    elif st.button("Sign Up"):
+    elif st.button("Sign Up", key="signup_button"):
         if username in st.session_state.users:
             st.error("Username already exists.")
         else:
@@ -32,10 +32,10 @@ def sign_up():
 
 def login():
     st.subheader("🔑 Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+    username = st.text_input("Username", key="login_username")
+    password = st.text_input("Password", type="password", key="login_password")
 
-    if st.button("Login"):
+    if st.button("Login", key="login_button"):
         if username in st.session_state.users and st.session_state.users[username] == password:
             st.session_state.authenticated = True
             st.success("Logged in successfully!")
@@ -52,7 +52,7 @@ if not st.session_state.authenticated:
     login()
 
     # Button to show Sign Up form
-    if st.button("Sign Up"):
+    if st.button("Sign Up", key="show_signup_button"):
         sign_up()
 
 else:
