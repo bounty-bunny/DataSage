@@ -103,9 +103,14 @@ elif menu_option == "Data Insights":
         st.session_state.df = df
         st.warning("Using sample data since no dataset was uploaded or connected.")
 
+    columns_to_analyze = st.multiselect("Select columns for EDA", df.columns)
+    if columns_to_analyze:
+        filtered_df = df[columns_to_analyze]
+    else:
+        filtered_df = df
     if st.button("🔍 Generate EDA Report"):
         with st.spinner("Generating report..."):
-            report = sv.analyze(df)
+            report = sv.analyze(filtered_df)
             report.show_html(filepath="sweetviz_report.html", open_browser=False)
 
             with open("sweetviz_report.html", "r", encoding="utf-8") as f:
@@ -124,4 +129,11 @@ if st.session_state.df is not None:
             data=st.session_state.df.to_csv(index=False),
             file_name="data_export.csv",
             mime="text/csv"
+        )
+    if st.sidebar.button("Export as Excel"):
+        st.sidebar.download_button(
+            label="Download Excel",
+            data=st.session_state.df.to_excel(index=False),
+            file_name="data_export.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
