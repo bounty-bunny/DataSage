@@ -12,6 +12,10 @@ from requests.auth import HTTPBasicAuth
 if 'users' not in st.session_state:
     st.session_state.users = {}
 
+# Ensure form_mode is initialized
+if 'form_mode' not in st.session_state:
+    st.session_state.form_mode = 'login'  # Default to login form
+
 # Helper functions for Sign Up and Login
 def sign_up():
     # Centering the form using container and markdown
