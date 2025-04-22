@@ -23,8 +23,9 @@ def sign_up():
         if password != confirm_password:
             st.error("Passwords do not match.")
         elif st.button("Sign Up", key="signup_button"):
-            conn = create_connection('your_database.db')  # Make sure the database path is correct
+            conn = create_connection('your_database.db')  # Ensure correct database path
             if conn:
+                create_user_table(conn)  # Ensure the table is created
                 if check_user(conn, username):
                     st.error("Username already exists.")
                 else:
@@ -45,7 +46,7 @@ def login():
             conn = create_connection('your_database.db')  # Make sure the database path is correct
             if conn:
                 user = check_user(conn, username)
-                if user and user[2] == password:  # Assuming the third field is the password
+                if user and user[2] == password:  # Assuming the second field is the password
                     st.session_state.authenticated = True
                     st.success("Logged in successfully!")
                 else:
@@ -221,14 +222,18 @@ else:
                     # Pie Chart
                     if chart_type == "Pie Chart":
                         for metric in selected_metrics:
-                            if df[metric].dtype in ['int64', 'float64']:
+                            if df[metric].dtype == 'object':
                                 fig = px.pie(df, names=metric, title=f"Pie Chart of {metric}")
                                 st.plotly_chart(fig, use_container_width=True)
 
                     # Scatter Plot
                     if chart_type == "Scatter Plot":
-                        if len(selected_metrics) >= 2:
-                            fig = px.scatter(df, x=selected_metrics[0], y=selected_metrics[1], title=f"Scatter Plot")
+                        if len(selected_metrics) == 2:
+                            x_col, y_col = selected_metrics
+                            fig = px.scatter(df, x=x_col, y=y_col, title=f"Scatter Plot of {x_col} vs {y_col}")
                             st.plotly_chart(fig, use_container_width=True)
+
+                else:
+                    st.warning("Please select at least one metric for visualization.")
         else:
             st.warning("Please upload or connect to a dataset first.")
