@@ -5,16 +5,10 @@ import plotly.express as px
 import sweetviz as sv
 import sqlite3
 import sqlalchemy
-import requests
-from requests.auth import HTTPBasicAuth
 
 # In-memory user storage (for demo purposes)
 if 'users' not in st.session_state:
     st.session_state.users = {}
-
-# Ensure form_mode is initialized
-if 'form_mode' not in st.session_state:
-    st.session_state.form_mode = 'login'  # Default to login form
 
 # Helper functions for Sign Up and Login
 def sign_up():
@@ -91,7 +85,7 @@ else:
     st.sidebar.header("📂 Upload or Connect")
     menu_option = st.sidebar.radio(
         "Choose Data Source",
-        ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)", "Data Insights", "Dashboard", "ServiceNow Integration"]
+        ["Upload File", "Connect SQL", "Data Insights", "Dashboard"]
     )
 
     # Upload File
@@ -193,27 +187,6 @@ else:
             st.plotly_chart(fig)
         else:
             st.warning("Please upload or connect to a dataset first.")
-
-    # ServiceNow Integration
-    elif menu_option == "ServiceNow Integration":
-        st.subheader("🔌 ServiceNow Data Fetch")
-        def fetch_servicenow_data():
-            url = "https://your-instance.service-now.com/api/now/table/incident"
-            auth = HTTPBasicAuth('username', 'password')  # Replace with ServiceNow credentials
-            headers = {"Accept": "application/json"}
-
-            response = requests.get(url, auth=auth, headers=headers)
-            if response.status_code == 200:
-                incidents = response.json()['result']
-                return pd.DataFrame(incidents)
-            else:
-                st.error("Error fetching data from ServiceNow")
-                return None
-        
-        df = fetch_servicenow_data()
-        if df is not None:
-            st.write("Fetched Data from ServiceNow:")
-            st.dataframe(df)
 
     # Display export/save options
     if st.session_state.df is not None:
