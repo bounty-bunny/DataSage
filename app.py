@@ -179,27 +179,51 @@ else:
 
             # Container to show all metrics together
             with st.container():
-                # Display Histogram for Numeric Columns
-                st.markdown("### Histogram of Numeric Columns")
-                numeric_columns = df.select_dtypes(include=['number']).columns
-                for col in numeric_columns:
-                    fig = px.histogram(df, x=col, title=f"Histogram of {col}")
-                    st.plotly_chart(fig, use_container_width=True)
+                # Metric Selection
+                selected_metrics = st.multiselect(
+                    "Select Metrics to Visualize",
+                    df.columns.tolist(),
+                    default=df.columns.tolist()  # Default to all columns
+                )
 
-                # Display Scatter Plot for Numeric Columns against each other
-                if len(numeric_columns) > 1:
-                    st.markdown("### Scatter Plot")
-                    scatter_x = st.selectbox("Select X-axis for Scatter Plot", numeric_columns)
-                    scatter_y = st.selectbox("Select Y-axis for Scatter Plot", numeric_columns)
-                    if scatter_x and scatter_y:
-                        scatter_fig = px.scatter(df, x=scatter_x, y=scatter_y, title=f"Scatter Plot of {scatter_x} vs {scatter_y}")
-                        st.plotly_chart(scatter_fig, use_container_width=True)
+                # Chart Type Selection
+                chart_type = st.selectbox(
+                    "Select Chart Type",
+                    ["Bar Chart", "Line Chart", "Pie Chart", "Scatter Plot"]
+                )
 
-                # Display Box Plot for Numeric Columns
-                st.markdown("### Box Plot of Numeric Columns")
-                for col in numeric_columns:
-                    box_fig = px.box(df, y=col, title=f"Box Plot of {col}")
-                    st.plotly_chart(box_fig, use_container_width=True)
+                # Show selected metrics
+                if selected_metrics:
+                    st.markdown("### Selected Metrics Visualization")
+
+                    # Bar Chart
+                    if chart_type == "Bar Chart":
+                        for metric in selected_metrics:
+                            if df[metric].dtype in ['int64', 'float64']:
+                                fig = px.bar(df, x=metric, title=f"Bar Chart of {metric}")
+                                st.plotly_chart(fig, use_container_width=True)
+
+                    # Line Chart
+                    if chart_type == "Line Chart":
+                        for metric in selected_metrics:
+                            if df[metric].dtype in ['int64', 'float64']:
+                                fig = px.line(df, x=df.index, y=metric, title=f"Line Chart of {metric}")
+                                st.plotly_chart(fig, use_container_width=True)
+
+                    # Pie Chart
+                    if chart_type == "Pie Chart":
+                        for metric in selected_metrics:
+                            if df[metric].dtype in ['int64', 'float64']:
+                                fig = px.pie(df, names=metric, title=f"Pie Chart of {metric}")
+                                st.plotly_chart(fig, use_container_width=True)
+
+                    # Scatter Plot
+                    if chart_type == "Scatter Plot":
+                        if len(selected_metrics) > 1:
+                            scatter_x = st.selectbox("Select X-axis for Scatter Plot", selected_metrics)
+                            scatter_y = st.selectbox("Select Y-axis for Scatter Plot", selected_metrics)
+                            fig = px.scatter(df, x=scatter_x, y=scatter_y, title=f"Scatter Plot of {scatter_x} vs {scatter_y}")
+                            st.plotly_chart(fig, use_container_width=True)
 
         else:
             st.warning("Please upload or connect to a dataset first.")
