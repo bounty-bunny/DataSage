@@ -3,8 +3,7 @@ import pandas as pd
 import sqlalchemy
 import sqlite3
 import sweetviz as sv
-import uuid
-from sklearn.datasets import load_iris
+import numpy as np
 
 st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
 st.title("📊 DataSage – Smart Data Uploader & Connector")
@@ -20,6 +19,17 @@ menu_option = st.sidebar.radio(
 if "df" not in st.session_state:
     st.session_state.df = None
 
+# Create a sample dataset when no file is uploaded
+def create_sample_data():
+    data = {
+        "ID": range(1, 11),
+        "Name": ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Hannah", "Ivy", "Jack"],
+        "Age": np.random.randint(20, 60, size=10),
+        "Salary": np.random.randint(30000, 120000, size=10),
+        "Department": ["HR", "IT", "Finance", "Marketing", "IT", "HR", "Marketing", "Finance", "IT", "HR"]
+    }
+    return pd.DataFrame(data)
+
 # Upload File
 if menu_option == "Upload File":
     uploaded_file = st.file_uploader("Upload CSV or Excel", type=["csv", "xlsx"])
@@ -30,7 +40,7 @@ if menu_option == "Upload File":
             else:
                 df = pd.read_excel(uploaded_file)
             st.session_state.df = df
-            st.success(f"Uploaded {uploaded_file.name} successfully!")
+            st.success(f"Uploaded `{uploaded_file.name}` successfully!")
             st.dataframe(df)
         except Exception as e:
             st.error(f"Error reading file: {e}")
@@ -81,32 +91,27 @@ elif menu_option == "Connect SQL":
             except Exception as e:
                 st.error(f"Connection Error: {e}")
 
-# Load Sample Data (Iris Dataset)
-elif menu_option == "Load Sample Data":
-    st.subheader("🌼 Sample Iris Dataset")
-    iris = load_iris(as_frame=True)
-    df = iris.frame
-    df["target"] = df["target"].map(dict(enumerate(iris.target_names)))
-    st.session_state.df = df
-    st.success("Loaded sample Iris dataset")
-    st.dataframe(df)
-
 # Data Insights (Sweetviz)
 elif menu_option == "Data Insights":
     st.subheader("📈 Automated EDA Report with Sweetviz")
 
     if st.session_state.df is not None:
         df = st.session_state.df
+    else:
+        # Use the sample dataset if no data is available
+        df = create_sample_data()
+        st.session_state.df = df
+        st.warning("Using sample data since no dataset was uploaded or connected.")
 
-        if st.button("🔍 Generate EDA Report"):
-            with st.spinner("Generating report..."):
-                report = sv.analyze(df)
-                report.show_html(filepath="sweetviz_report.html", open_browser=False)
+    if st.button("🔍 Generate EDA Report"):
+        with st.spinner("Generating report..."):
+            report = sv.analyze(df)
+            report.show_html(filepath="sweetviz_report.html", open_browser=False)
 
-                with open("sweetviz_report.html", "r", encoding="utf-8") as f:
-                    html_report = f.read()
+            with open("sweetviz_report.html", "r", encoding="utf-8") as f:
+                html_report = f.read()
 
-                st.components.v1.html(html_report, height=1000, scrolling=True)
+            st.components.v1.html(html_report, height=1000, scrolling=True)
     else:
         st.warning("Please upload or connect to a dataset first.")
 
