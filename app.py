@@ -4,6 +4,7 @@ import sqlalchemy
 import sqlite3
 import sweetviz as sv
 import numpy as np
+import plotly.express as px
 
 st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
 st.title("📊 DataSage – Smart Data Uploader & Connector")
@@ -119,6 +120,48 @@ elif menu_option == "Data Insights":
             st.components.v1.html(html_report, height=1000, scrolling=True)
     else:
         st.warning("Please upload or connect to a dataset first.")
+
+# Data Cleaning Functions
+if st.session_state.df is not None:
+    st.sidebar.subheader("🧹 Data Cleaning")
+    if st.sidebar.button("Drop Duplicates"):
+        st.session_state.df = st.session_state.df.drop_duplicates()
+        st.success("Duplicates removed!")
+
+    # Drop missing values
+    if st.sidebar.button("Drop Missing Values"):
+        st.session_state.df = st.session_state.df.dropna()
+        st.success("Missing values removed!")
+
+# Visualization Tools
+if st.session_state.df is not None:
+    st.sidebar.subheader("📊 Visualizations")
+    chart_type = st.selectbox("Select Chart Type", ["Bar Chart", "Line Chart", "Scatter Plot", "Histogram"])
+
+    if chart_type == "Bar Chart":
+        column = st.selectbox("Select Column for Bar Chart", st.session_state.df.columns)
+        if st.button("Generate Bar Chart"):
+            fig = px.bar(st.session_state.df, x=column, title=f"Bar Chart of {column}")
+            st.plotly_chart(fig)
+
+    elif chart_type == "Line Chart":
+        column = st.selectbox("Select Column for Line Chart", st.session_state.df.columns)
+        if st.button("Generate Line Chart"):
+            fig = px.line(st.session_state.df, x=st.session_state.df.index, y=column, title=f"Line Chart of {column}")
+            st.plotly_chart(fig)
+
+    elif chart_type == "Scatter Plot":
+        x_column = st.selectbox("Select X Column", st.session_state.df.columns)
+        y_column = st.selectbox("Select Y Column", st.session_state.df.columns)
+        if st.button("Generate Scatter Plot"):
+            fig = px.scatter(st.session_state.df, x=x_column, y=y_column, title=f"Scatter Plot of {x_column} vs {y_column}")
+            st.plotly_chart(fig)
+
+    elif chart_type == "Histogram":
+        column = st.selectbox("Select Column for Histogram", st.session_state.df.columns)
+        if st.button("Generate Histogram"):
+            fig = px.histogram(st.session_state.df, x=column, title=f"Histogram of {column}")
+            st.plotly_chart(fig)
 
 # Display export/save options
 if st.session_state.df is not None:
