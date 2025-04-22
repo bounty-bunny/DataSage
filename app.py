@@ -84,8 +84,9 @@ elif menu_option == "Data Insights":
     st.subheader("📈 Automated EDA Report with Sweetviz")
 
     if st.session_state.df is not None:
-        df = st.session_state.df
+    df = st.session_state.df
 
+    if st.button("🔍 Generate EDA Report"):
         with st.spinner("Generating report..."):
             report = sv.analyze(df)
             report.show_html(filepath="sweetviz_report.html", open_browser=False)
@@ -94,8 +95,8 @@ elif menu_option == "Data Insights":
                 html_report = f.read()
 
             st.components.v1.html(html_report, height=1000, scrolling=True)
-    else:
-        st.warning("Please upload or connect to a dataset first.")
+else:
+    st.warning("Please upload or connect to a dataset first.")
 
 # Display export/save options
 if st.session_state.df is not None:
