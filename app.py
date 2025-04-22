@@ -14,33 +14,37 @@ if 'users' not in st.session_state:
 
 # Helper functions for Sign Up and Login
 def sign_up():
-    st.subheader("📋 Sign Up")
-    username = st.text_input("Create Username", key="signup_username")
-    password = st.text_input("Create Password", type="password", key="signup_password")
-    confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password")
+    # Centering the form using container and markdown
+    with st.container():
+        st.markdown("<h2 style='text-align: center;'>Sign Up</h2>", unsafe_allow_html=True)
+        username = st.text_input("Create Username", key="signup_username")
+        password = st.text_input("Create Password", type="password", key="signup_password")
+        confirm_password = st.text_input("Confirm Password", type="password", key="confirm_password")
 
-    if password != confirm_password:
-        st.error("Passwords do not match.")
-    elif st.button("Sign Up", key="signup_button"):
-        if username in st.session_state.users:
-            st.error("Username already exists.")
-        else:
-            st.session_state.users[username] = password
-            st.success("Account created successfully. Please log in.")
-            st.session_state.authenticated = False
-            st.experimental_rerun()
+        if password != confirm_password:
+            st.error("Passwords do not match.")
+        elif st.button("Sign Up", key="signup_button"):
+            if username in st.session_state.users:
+                st.error("Username already exists.")
+            else:
+                st.session_state.users[username] = password
+                st.success("Account created successfully. Please log in.")
+                st.session_state.authenticated = False
+                st.experimental_rerun()
 
 def login():
-    st.subheader("🔑 Login")
-    username = st.text_input("Username", key="login_username")
-    password = st.text_input("Password", type="password", key="login_password")
+    # Centering the form using container and markdown
+    with st.container():
+        st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
+        username = st.text_input("Username", key="login_username")
+        password = st.text_input("Password", type="password", key="login_password")
 
-    if st.button("Login", key="login_button"):
-        if username in st.session_state.users and st.session_state.users[username] == password:
-            st.session_state.authenticated = True
-            st.success("Logged in successfully!")
-        else:
-            st.error("Incorrect username or password.")
+        if st.button("Login", key="login_button"):
+            if username in st.session_state.users and st.session_state.users[username] == password:
+                st.session_state.authenticated = True
+                st.success("Logged in successfully!")
+            else:
+                st.error("Incorrect username or password.")
 
 # Initialize session state if not already initialized
 if 'authenticated' not in st.session_state:
