@@ -51,12 +51,17 @@ if 'authenticated' not in st.session_state:
 
 # Main flow: Check if user is authenticated
 if not st.session_state.authenticated:
-    auth_option = st.selectbox("Choose Authentication", ["Login", "Sign Up"])
+    # Two buttons to toggle between login and signup
+    login_button, sign_up_button = st.columns(2)
 
-    if auth_option == "Login":
-        login()
-    elif auth_option == "Sign Up":
-        sign_up()
+    with login_button:
+        if st.button("Login"):
+            login()
+
+    with sign_up_button:
+        if st.button("Sign Up"):
+            sign_up()
+
 else:
     # Session cache
     if "df" not in st.session_state:
@@ -185,36 +190,4 @@ else:
         st.subheader("🔌 ServiceNow Data Fetch")
         def fetch_servicenow_data():
             url = "https://your-instance.service-now.com/api/now/table/incident"
-            auth = HTTPBasicAuth('username', 'password')  # Replace with ServiceNow credentials
-            headers = {"Accept": "application/json"}
-
-            response = requests.get(url, auth=auth, headers=headers)
-            if response.status_code == 200:
-                incidents = response.json()['result']
-                return pd.DataFrame(incidents)
-            else:
-                st.error("Error fetching data from ServiceNow")
-                return None
-        
-        df = fetch_servicenow_data()
-        if df is not None:
-            st.write("Fetched Data from ServiceNow:")
-            st.dataframe(df)
-
-    # Display export/save options
-    if st.session_state.df is not None:
-        st.sidebar.subheader("💾 Save / Export")
-        if st.sidebar.button("Export as CSV"):
-            st.sidebar.download_button(
-                label="Download CSV",
-                data=st.session_state.df.to_csv(index=False),
-                file_name="data_export.csv",
-                mime="text/csv"
-            )
-        if st.sidebar.button("Export as Excel"):
-            st.sidebar.download_button(
-                label="Download Excel",
-                data=st.session_state.df.to_excel(index=False),
-                file_name="data_export.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+            auth = HTTPBasicAuth('username', 'password')  #
