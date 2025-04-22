@@ -10,6 +10,12 @@ import sqlalchemy
 if 'users' not in st.session_state:
     st.session_state.users = {}
 
+# Initialize session state variables if they don't exist
+if 'form_mode' not in st.session_state:
+    st.session_state.form_mode = 'login'  # Default to 'login' mode
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+
 # Helper functions for Sign Up and Login
 def sign_up():
     with st.container():
@@ -43,9 +49,6 @@ def login():
                 st.error("Incorrect username or password.")
 
 # Main flow: Check if user is authenticated
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-
 if not st.session_state.authenticated:
     if st.session_state.form_mode == 'login':
         login()
