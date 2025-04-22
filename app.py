@@ -27,8 +27,12 @@ def login():
         st.error("Incorrect username or password.")
     return st.session_state.authenticated
 
+# Initialize session state if not already initialized
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+
 # Check if user is authenticated
-if 'authenticated' not in st.session_state or not st.session_state.authenticated:
+if not st.session_state.authenticated:
     if login():
         st.experimental_rerun()  # Reload to show the main app after successful login
 else:
