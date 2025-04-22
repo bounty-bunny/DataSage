@@ -78,17 +78,6 @@ elif menu_option == "Connect SQL":
                     st.dataframe(df)
             except Exception as e:
                 st.error(f"Connection Error: {e}")
-                
-# ✅ Sample Data (Iris)
-elif menu_option == "Load Sample Data":
-    st.subheader("🌼 Loading Sample Iris Dataset")
-    from sklearn.datasets import load_iris
-    iris = load_iris(as_frame=True)
-    df = iris.frame
-    df["target"] = df["target"].map(dict(enumerate(iris.target_names)))
-    st.session_state.df = df
-    st.success("Sample Iris dataset loaded!")
-    st.dataframe(df)
 
 # Data Insights (Sweetviz)
 elif menu_option == "Data Insights":
