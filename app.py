@@ -1,40 +1,62 @@
 import streamlit as st
 import pandas as pd
-import sqlalchemy
-import sqlite3
-import sweetviz as sv
 import numpy as np
+import sweetviz as sv
 import plotly.express as px
-import requests
+import sqlite3
+import sqlalchemy
 from requests.auth import HTTPBasicAuth
 
 # Streamlit Page Configuration
 st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
 st.title("📊 DataSage – Smart Data Uploader & Connector")
 
-# Simple login mechanism (no OAuth)
+# In-memory user storage (for demo purposes)
+if 'users' not in st.session_state:
+    st.session_state.users = {}
+
+# Helper functions for Sign Up and Login
+def sign_up():
+    st.subheader("📋 Sign Up")
+    username = st.text_input("Create Username")
+    password = st.text_input("Create Password", type="password")
+    confirm_password = st.text_input("Confirm Password", type="password")
+
+    if password != confirm_password:
+        st.error("Passwords do not match.")
+    elif st.button("Sign Up"):
+        if username in st.session_state.users:
+            st.error("Username already exists.")
+        else:
+            st.session_state.users[username] = password
+            st.success("Account created successfully. Please log in.")
+            st.session_state.authenticated = False
+            st.experimental_rerun()
+
 def login():
     st.subheader("🔑 Login")
-    
-    # Basic username and password check (hardcoded for now)
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    if username == "admin" and password == "password123":
-        st.session_state.authenticated = True
-        st.success("Logged in successfully!")
-    elif username and password:
-        st.error("Incorrect username or password.")
-    return st.session_state.authenticated
+    if st.button("Login"):
+        if username in st.session_state.users and st.session_state.users[username] == password:
+            st.session_state.authenticated = True
+            st.success("Logged in successfully!")
+        else:
+            st.error("Incorrect username or password.")
 
 # Initialize session state if not already initialized
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
-# Check if user is authenticated
+# Main flow: Check if user is authenticated
 if not st.session_state.authenticated:
-    if login():
-        st.experimental_rerun()  # Reload to show the main app after successful login
+    auth_option = st.selectbox("Choose Authentication", ["Login", "Sign Up"])
+
+    if auth_option == "Login":
+        login()
+    elif auth_option == "Sign Up":
+        sign_up()
 else:
     # Session cache
     if "df" not in st.session_state:
