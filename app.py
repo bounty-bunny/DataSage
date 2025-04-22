@@ -4,11 +4,7 @@ import numpy as np
 import plotly.express as px
 import sweetviz as sv
 import sqlite3
-import sqlalchemy
-
-# In-memory user storage (for demo purposes)
-if 'users' not in st.session_state:
-    st.session_state.users = {}
+from db import create_connection, create_user_table, check_user, add_user
 
 # Initialize session state variables if they don't exist
 if 'form_mode' not in st.session_state:
@@ -27,13 +23,13 @@ def sign_up():
         if password != confirm_password:
             st.error("Passwords do not match.")
         elif st.button("Sign Up", key="signup_button"):
-            if username in st.session_state.users:
+            if check_user(username):
                 st.error("Username already exists.")
             else:
-                st.session_state.users[username] = password
+                add_user(username, password)
                 st.success("Account created successfully. Please log in.")
-                st.session_state.form_mode = 'login'  
-                st.experimental_rerun()  
+                st.session_state.form_mode = 'login'  # Switch to login mode
+                st.experimental_rerun()  # Re-run the app to refresh
 
 def login():
     with st.container():
@@ -42,7 +38,7 @@ def login():
         password = st.text_input("Password", type="password", key="login_password")
 
         if st.button("Login", key="login_button"):
-            if username in st.session_state.users and st.session_state.users[username] == password:
+            if check_user(username, password):
                 st.session_state.authenticated = True
                 st.success("Logged in successfully!")
             else:
@@ -57,12 +53,12 @@ if not st.session_state.authenticated:
 
     if st.session_state.form_mode == 'login':
         if st.button("Don't have an account? Sign Up"):
-            st.session_state.form_mode = 'signup'  
-            st.experimental_rerun()  
+            st.session_state.form_mode = 'signup'  # Switch to sign-up mode
+            st.experimental_rerun()  # Re-run the app to refresh
     elif st.session_state.form_mode == 'signup':
         if st.button("Already have an account? Login"):
-            st.session_state.form_mode = 'login'  
-            st.experimental_rerun()  
+            st.session_state.form_mode = 'login'  # Switch to login mode
+            st.experimental_rerun()  # Re-run the app to refresh
 
 else:
     if "df" not in st.session_state:
@@ -246,5 +242,5 @@ else:
                 label="Download Excel",
                 data=st.session_state.df.to_excel(index=False),
                 file_name="data_export.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                mime="application/vnd.ms-excel"
             )
