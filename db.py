@@ -5,13 +5,26 @@ def create_connection(db_file):
     return conn
 
 def create_user_table(conn):
-    # SQL statement to create user table
-    pass
+    # SQL to create the user table
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            password TEXT NOT NULL
+        );
+    ''')
+    conn.commit()
 
 def check_user(conn, username):
-    # Function to check if user exists
-    pass
+    # Check if the user already exists in the database
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+    user = cursor.fetchone()
+    return user  # Returns None if no user is found, else returns the user row
 
 def add_user(conn, username, password):
-    # Function to add a new user to the database
-    pass
+    # Add a new user to the database
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+    conn.commit()
