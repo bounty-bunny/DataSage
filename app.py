@@ -3,6 +3,8 @@ import pandas as pd
 import sqlalchemy
 import sqlite3
 import sweetviz as sv
+import uuid
+from sklearn.datasets import load_iris
 
 st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
 st.title("📊 DataSage – Smart Data Uploader & Connector")
@@ -78,6 +80,16 @@ elif menu_option == "Connect SQL":
                     st.dataframe(df)
             except Exception as e:
                 st.error(f"Connection Error: {e}")
+
+# Load Sample Data (Iris Dataset)
+elif menu_option == "Load Sample Data":
+    st.subheader("🌼 Sample Iris Dataset")
+    iris = load_iris(as_frame=True)
+    df = iris.frame
+    df["target"] = df["target"].map(dict(enumerate(iris.target_names)))
+    st.session_state.df = df
+    st.success("Loaded sample Iris dataset")
+    st.dataframe(df)
 
 # Data Insights (Sweetviz)
 elif menu_option == "Data Insights":
