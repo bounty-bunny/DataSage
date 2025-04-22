@@ -12,7 +12,6 @@ if 'users' not in st.session_state:
 
 # Helper functions for Sign Up and Login
 def sign_up():
-    # Centering the form using container and markdown
     with st.container():
         st.markdown("<h2 style='text-align: center;'>Sign Up</h2>", unsafe_allow_html=True)
         username = st.text_input("Create Username", key="signup_username")
@@ -27,11 +26,10 @@ def sign_up():
             else:
                 st.session_state.users[username] = password
                 st.success("Account created successfully. Please log in.")
-                st.session_state.form_mode = 'login'  # Switch back to login form after successful signup
-                st.experimental_rerun()  # Re-run to refresh the state and show login form
+                st.session_state.form_mode = 'login'  
+                st.experimental_rerun()  
 
 def login():
-    # Centering the form using container and markdown
     with st.container():
         st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
         username = st.text_input("Username", key="login_username")
@@ -49,28 +47,24 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    # Show login or sign-up form based on form_mode state
     if st.session_state.form_mode == 'login':
         login()
     elif st.session_state.form_mode == 'signup':
         sign_up()
 
-    # Button to switch between forms
     if st.session_state.form_mode == 'login':
         if st.button("Don't have an account? Sign Up"):
-            st.session_state.form_mode = 'signup'  # Switch to sign-up form
-            st.experimental_rerun()  # Refresh to show the sign-up form
+            st.session_state.form_mode = 'signup'  
+            st.experimental_rerun()  
     elif st.session_state.form_mode == 'signup':
         if st.button("Already have an account? Login"):
-            st.session_state.form_mode = 'login'  # Switch to login form
-            st.experimental_rerun()  # Refresh to show the login form
+            st.session_state.form_mode = 'login'  
+            st.experimental_rerun()  
 
 else:
-    # Session cache
     if "df" not in st.session_state:
         st.session_state.df = None
 
-    # Create a sample dataset when no file is uploaded
     def create_sample_data():
         data = {
             "ID": range(1, 11),
@@ -179,12 +173,34 @@ else:
     # Dashboard
     elif menu_option == "Dashboard":
         st.subheader("📊 Data Dashboard")
+
         if st.session_state.df is not None:
             df = st.session_state.df
-            st.write("Select metrics to visualize:")
-            metric = st.selectbox("Select Metric", df.columns)
-            fig = px.histogram(df, x=metric)
-            st.plotly_chart(fig)
+
+            # Container to show all metrics together
+            with st.container():
+                # Display Histogram for Numeric Columns
+                st.markdown("### Histogram of Numeric Columns")
+                numeric_columns = df.select_dtypes(include=['number']).columns
+                for col in numeric_columns:
+                    fig = px.histogram(df, x=col, title=f"Histogram of {col}")
+                    st.plotly_chart(fig, use_container_width=True)
+
+                # Display Scatter Plot for Numeric Columns against each other
+                if len(numeric_columns) > 1:
+                    st.markdown("### Scatter Plot")
+                    scatter_x = st.selectbox("Select X-axis for Scatter Plot", numeric_columns)
+                    scatter_y = st.selectbox("Select Y-axis for Scatter Plot", numeric_columns)
+                    if scatter_x and scatter_y:
+                        scatter_fig = px.scatter(df, x=scatter_x, y=scatter_y, title=f"Scatter Plot of {scatter_x} vs {scatter_y}")
+                        st.plotly_chart(scatter_fig, use_container_width=True)
+
+                # Display Box Plot for Numeric Columns
+                st.markdown("### Box Plot of Numeric Columns")
+                for col in numeric_columns:
+                    box_fig = px.box(df, y=col, title=f"Box Plot of {col}")
+                    st.plotly_chart(box_fig, use_container_width=True)
+
         else:
             st.warning("Please upload or connect to a dataset first.")
 
