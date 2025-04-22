@@ -35,11 +35,11 @@ def sign_up():
 def login():
     # Centering the form using container and markdown
     with st.container():
-        st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center;'>DataSage</h2>", unsafe_allow_html=True)
         username = st.text_input("Username", key="login_username")
         password = st.text_input("Password", type="password", key="login_password")
 
-        if st.button("DataSage", key="login_button"):
+        if st.button("Login", key="login_button"):
             if username in st.session_state.users and st.session_state.users[username] == password:
                 st.session_state.authenticated = True
                 st.success("Logged in successfully!")
