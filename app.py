@@ -3,10 +3,7 @@ import pandas as pd
 import sqlalchemy
 import sqlite3
 import sweetviz as sv
-import uuid
-from sklearn.datasets import load_iris
 
-# Set page configuration
 st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
 st.title("📊 DataSage – Smart Data Uploader & Connector")
 
@@ -14,7 +11,7 @@ st.title("📊 DataSage – Smart Data Uploader & Connector")
 st.sidebar.header("📂 Upload or Connect")
 menu_option = st.sidebar.radio(
     "Choose Data Source",
-    ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)", "Load Sample Data", "Data Insights"]
+    ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)", "Data Insights"]
 )
 
 # Session cache
@@ -31,7 +28,7 @@ if menu_option == "Upload File":
             else:
                 df = pd.read_excel(uploaded_file)
             st.session_state.df = df
-            st.success(f"Uploaded `{uploaded_file.name}` successfully!")
+            st.success(f"Uploaded {uploaded_file.name} successfully!")
             st.dataframe(df)
         except Exception as e:
             st.error(f"Error reading file: {e}")
@@ -82,16 +79,6 @@ elif menu_option == "Connect SQL":
             except Exception as e:
                 st.error(f"Connection Error: {e}")
 
-# Load Sample Data (Iris Dataset)
-elif menu_option == "Load Sample Data":
-    st.subheader("🌼 Sample Iris Dataset")
-    iris = load_iris(as_frame=True)
-    df = iris.frame
-    df["target"] = df["target"].map(dict(enumerate(iris.target_names)))
-    st.session_state.df = df
-    st.success("Loaded sample Iris dataset")
-    st.dataframe(df)
-
 # Data Insights (Sweetviz)
 elif menu_option == "Data Insights":
     st.subheader("📈 Automated EDA Report with Sweetviz")
@@ -101,14 +88,10 @@ elif menu_option == "Data Insights":
 
         if st.button("🔍 Generate EDA Report"):
             with st.spinner("Generating report..."):
-                # Generate unique filename
-                unique_id = str(uuid.uuid4())[:8]
-                filepath = f"sweetviz_report_{unique_id}.html"
                 report = sv.analyze(df)
-                report.show_html(filepath=filepath, open_browser=False)
+                report.show_html(filepath="sweetviz_report.html", open_browser=False)
 
-                # Read and display the HTML report
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open("sweetviz_report.html", "r", encoding="utf-8") as f:
                     html_report = f.read()
 
                 st.components.v1.html(html_report, height=1000, scrolling=True)
