@@ -78,6 +78,7 @@ elif menu_option == "Connect SQL":
                     st.dataframe(df)
             except Exception as e:
                 st.error(f"Connection Error: {e}")
+                
 # ✅ Sample Data (Iris)
 elif menu_option == "Load Sample Data":
     st.subheader("🌼 Loading Sample Iris Dataset")
