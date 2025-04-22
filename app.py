@@ -7,44 +7,31 @@ import numpy as np
 import plotly.express as px
 import requests
 from requests.auth import HTTPBasicAuth
-from authlib.integrations.requests_client import OAuth2Session
-
-# SSO (OAuth) Integration Setup using Auth0
-# For simplicity, use a mock SSO flow here - replace with actual Auth0/Okta/SSO configurations in production
-CLIENT_ID = "your_client_id"
-CLIENT_SECRET = "your_client_secret"
-AUTHORIZATION_URL = "https://your-auth0-domain/authorize"
-TOKEN_URL = "https://your-auth0-domain/oauth/token"
-REDIRECT_URI = "http://localhost:8501"
-
-def authenticate_user():
-    oauth = OAuth2Session(CLIENT_ID, CLIENT_SECRET, redirect_uri=REDIRECT_URI)
-    authorization_url, state = oauth.authorization_url(AUTHORIZATION_URL)
-    st.write(f"Please [Login](%s) to continue" % authorization_url)
-    # After login, the user is redirected here and we fetch the token to verify
-    if 'code' in st.experimental_get_query_params():
-        oauth.fetch_token(TOKEN_URL, authorization_response=st.experimental_get_query_params()['code'])
-        st.session_state.authenticated = True
-        st.success("Logged in successfully!")
-    else:
-        st.session_state.authenticated = False
 
 # Streamlit Page Configuration
 st.set_page_config(page_title="DataSage – Smart Data Tool", layout="wide")
 st.title("📊 DataSage – Smart Data Uploader & Connector")
 
-# Sidebar Menu
-st.sidebar.header("📂 Upload or Connect")
-menu_option = st.sidebar.radio(
-    "Choose Data Source",
-    ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)", "Data Insights", "Dashboard", "ServiceNow Integration"]
-)
+# Simple login mechanism (no OAuth)
+def login():
+    st.subheader("🔑 Login")
+    
+    # Basic username and password check (hardcoded for now)
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
-# Check Authentication
+    if username == "admin" and password == "password123":
+        st.session_state.authenticated = True
+        st.success("Logged in successfully!")
+    elif username and password:
+        st.error("Incorrect username or password.")
+    return st.session_state.authenticated
+
+# Check if user is authenticated
 if 'authenticated' not in st.session_state or not st.session_state.authenticated:
-    authenticate_user()
-
-if st.session_state.authenticated:
+    if login():
+        st.experimental_rerun()  # Reload to show the main app after successful login
+else:
     # Session cache
     if "df" not in st.session_state:
         st.session_state.df = None
@@ -59,6 +46,13 @@ if st.session_state.authenticated:
             "Department": ["HR", "IT", "Finance", "Marketing", "IT", "HR", "Marketing", "Finance", "IT", "HR"]
         }
         return pd.DataFrame(data)
+
+    # Sidebar Menu
+    st.sidebar.header("📂 Upload or Connect")
+    menu_option = st.sidebar.radio(
+        "Choose Data Source",
+        ["Upload File", "Connect SQL", "Connect SharePoint (Coming Soon)", "Data Insights", "Dashboard", "ServiceNow Integration"]
+    )
 
     # Upload File
     if menu_option == "Upload File":
