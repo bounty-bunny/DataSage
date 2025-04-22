@@ -23,13 +23,17 @@ def sign_up():
         if password != confirm_password:
             st.error("Passwords do not match.")
         elif st.button("Sign Up", key="signup_button"):
-            if check_user(username):
-                st.error("Username already exists.")
+            conn = create_connection('your_database.db')  # Make sure the database path is correct
+            if conn:
+                if check_user(conn, username):
+                    st.error("Username already exists.")
+                else:
+                    add_user(conn, username, password)
+                    st.success("Account created successfully. Please log in.")
+                    st.session_state.form_mode = 'login'  # Switch to login mode
+                    st.experimental_rerun()  # Re-run the app to refresh
             else:
-                add_user(username, password)
-                st.success("Account created successfully. Please log in.")
-                st.session_state.form_mode = 'DataSage'  # Switch to login mode
-                st.experimental_rerun()  # Re-run the app to refresh
+                st.error("Failed to connect to the database.")
 
 def login():
     with st.container():
@@ -41,7 +45,7 @@ def login():
             conn = create_connection('your_database.db')  # Make sure the database path is correct
             if conn:
                 user = check_user(conn, username)
-                if user and user[1] == password:  # Assuming the second field is the password
+                if user and user[2] == password:  # Assuming the third field is the password
                     st.session_state.authenticated = True
                     st.success("Logged in successfully!")
                 else:
@@ -223,29 +227,8 @@ else:
 
                     # Scatter Plot
                     if chart_type == "Scatter Plot":
-                        if len(selected_metrics) > 1:
-                            scatter_x = st.selectbox("Select X-axis for Scatter Plot", selected_metrics)
-                            scatter_y = st.selectbox("Select Y-axis for Scatter Plot", selected_metrics)
-                            fig = px.scatter(df, x=scatter_x, y=scatter_y, title=f"Scatter Plot of {scatter_x} vs {scatter_y}")
+                        if len(selected_metrics) >= 2:
+                            fig = px.scatter(df, x=selected_metrics[0], y=selected_metrics[1], title=f"Scatter Plot")
                             st.plotly_chart(fig, use_container_width=True)
-
         else:
             st.warning("Please upload or connect to a dataset first.")
-
-    # Display export/save options
-    if st.session_state.df is not None:
-        st.sidebar.subheader("💾 Save / Export")
-        if st.sidebar.button("Export as CSV"):
-            st.sidebar.download_button(
-                label="Download CSV",
-                data=st.session_state.df.to_csv(index=False),
-                file_name="data_export.csv",
-                mime="text/csv"
-            )
-        if st.sidebar.button("Export as Excel"):
-            st.sidebar.download_button(
-                label="Download Excel",
-                data=st.session_state.df.to_excel(index=False),
-                file_name="data_export.xlsx",
-                mime="application/vnd.ms-excel"
-            )
