@@ -28,7 +28,7 @@ def sign_up():
             else:
                 add_user(username, password)
                 st.success("Account created successfully. Please log in.")
-                st.session_state.form_mode = 'login'  # Switch to login mode
+                st.session_state.form_mode = 'DataSage'  # Switch to login mode
                 st.experimental_rerun()  # Re-run the app to refresh
 
 def login():
