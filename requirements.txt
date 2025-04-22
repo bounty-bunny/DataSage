@@ -1,8 +1,7 @@
 streamlit==1.33.0
 pandas==2.2.2
 sqlalchemy==2.0.29
-sqlite3-binary; python_version>="3.12"  # Optional: may vary by OS
 sweetviz==2.3.1
-openpyxl==3.1.2  # For Excel support
-psycopg2-binary==2.9.9  # PostgreSQL
-mysql-connector-python==8.3.0  # MySQL
+openpyxl==3.1.2
+psycopg2-binary==2.9.9
+mysql-connector-python==8.3.0
