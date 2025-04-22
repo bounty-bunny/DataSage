@@ -29,13 +29,13 @@ def sign_up():
             else:
                 st.session_state.users[username] = password
                 st.success("Account created successfully. Please log in.")
-                st.session_state.authenticated = False
-                st.experimental_rerun()
+                st.session_state.form_mode = 'login'  # Switch back to login form after successful signup
+                st.experimental_rerun()  # Re-run to refresh the state and show login form
 
 def login():
     # Centering the form using container and markdown
     with st.container():
-        st.markdown("<h2 style='text-align: center;'>DataSage</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
         username = st.text_input("Username", key="login_username")
         password = st.text_input("Password", type="password", key="login_password")
 
@@ -46,18 +46,26 @@ def login():
             else:
                 st.error("Incorrect username or password.")
 
-# Initialize session state if not already initialized
+# Main flow: Check if user is authenticated
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
-# Main flow: Check if user is authenticated
 if not st.session_state.authenticated:
-    # Show login form
-    login()
-
-    # Button to show Sign Up form
-    if st.button("Sign Up", key="show_signup_button"):
+    # Show login or sign-up form based on form_mode state
+    if st.session_state.form_mode == 'login':
+        login()
+    elif st.session_state.form_mode == 'signup':
         sign_up()
+
+    # Button to switch between forms
+    if st.session_state.form_mode == 'login':
+        if st.button("Don't have an account? Sign Up"):
+            st.session_state.form_mode = 'signup'  # Switch to sign-up form
+            st.experimental_rerun()  # Refresh to show the sign-up form
+    elif st.session_state.form_mode == 'signup':
+        if st.button("Already have an account? Login"):
+            st.session_state.form_mode = 'login'  # Switch to login form
+            st.experimental_rerun()  # Refresh to show the login form
 
 else:
     # Session cache
