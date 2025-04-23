@@ -150,33 +150,37 @@ else:
                     st.components.v1.html(f.read(), height=800, scrolling=True)
 
     elif menu == "Dashboard":
-        st.subheader("📈 Visual Dashboard")
+    st.subheader("📈 Visual Dashboard")
+
+    if "df" in st.session_state:
         df = st.session_state.df
 
-    if df is not None and not df.empty:
-        cols = st.multiselect("Select Columns", df.columns.tolist(), default=df.columns.tolist())
-        chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Pie", "Scatter"])
+        if df is not None and not df.empty:
+            cols = st.multiselect("Select Columns", df.columns.tolist(), default=df.columns.tolist())
+            chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Pie", "Scatter"])
 
-        if chart_type == "Bar":
-            for col in cols:
-                if df[col].dtype in ['int64', 'float64']:
-                    fig = px.bar(df, x=col)
-                    st.plotly_chart(fig)
+            if chart_type == "Bar":
+                for col in cols:
+                    if df[col].dtype in ['int64', 'float64']:
+                        fig = px.bar(df, x=col)
+                        st.plotly_chart(fig)
 
-        elif chart_type == "Line":
-            for col in cols:
-                if df[col].dtype in ['int64', 'float64']:
-                    fig = px.line(df, y=col)
-                    st.plotly_chart(fig)
+            elif chart_type == "Line":
+                for col in cols:
+                    if df[col].dtype in ['int64', 'float64']:
+                        fig = px.line(df, y=col)
+                        st.plotly_chart(fig)
 
-        elif chart_type == "Pie":
-            for col in cols:
-                if df[col].dtype == "object":
-                    fig = px.pie(df, names=col)
-                    st.plotly_chart(fig)
+            elif chart_type == "Pie":
+                for col in cols:
+                    if df[col].dtype == "object":
+                        fig = px.pie(df, names=col)
+                        st.plotly_chart(fig)
 
-        elif chart_type == "Scatter" and len(cols) == 2:
-            fig = px.scatter(df, x=cols[0], y=cols[1])
-            st.plotly_chart(fig)
+            elif chart_type == "Scatter" and len(cols) == 2:
+                fig = px.scatter(df, x=cols[0], y=cols[1])
+                st.plotly_chart(fig)
+        else:
+            st.warning("The dataset is empty or invalid.")
     else:
         st.warning("Please upload or connect to a dataset first.")
