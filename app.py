@@ -45,7 +45,7 @@ def login():
     if st.button("Login"):
         conn = create_connection('your_database.db')
         if conn:
-            user = check_user(conn, username)
+            user = check_user(conn, username, password)
             if user and user[2] == password:
                 st.session_state.authenticated = True
                 st.success("Login successful.")
