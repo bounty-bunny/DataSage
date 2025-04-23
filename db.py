@@ -30,12 +30,13 @@ def check_user(conn, username, password):
     except sqlite3.Error as e:
         print(f"Error checking user: {e}")
         return None
-def add_user(conn, username, password):
+        
+def add_user(conn, username, password, role="viewer"):
     try:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, password, role))
         conn.commit()
-        print(f"[DB] User '{username}' added successfully.")
+        print(f"[DB] User '{username}' added successfully with role '{role}'.")
     except sqlite3.IntegrityError:
         print(f"[DB ERROR] Username '{username}' already exists.")
     except sqlite3.Error as e:
