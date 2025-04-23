@@ -34,7 +34,7 @@ def sign_up():
         if check_user(conn, username):
             st.error("Username already exists.")
         else:
-            user = add_user(conn, username, password)
+            add_user(conn, username, password)
             st.success("Account created successfully. Please log in.")
             st.session_state.form_mode = 'login'
             st.experimental_rerun()
