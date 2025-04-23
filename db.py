@@ -4,7 +4,7 @@ def create_connection(db_file):
     """Create a database connection to the SQLite database."""
     try:
         conn = sqlite3.connect(db_file, check_same_thread=False)
-        conn.execute("PRAGMA foreign_keys = ON")  # Ensure foreign key constraints
+        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
         print(f"[DB] Connected to {db_file} successfully")
         return conn
     except sqlite3.Error as e:
@@ -12,7 +12,7 @@ def create_connection(db_file):
         return None
 
 def execute_query(conn, query, description):
-    """Utility to execute a SQL query with basic error logging."""
+    """Utility to execute SQL with logging."""
     try:
         cursor = conn.cursor()
         cursor.executescript(query)
@@ -21,26 +21,7 @@ def execute_query(conn, query, description):
     except sqlite3.Error as e:
         print(f"[DB ERROR] {description} - {e}")
 
-def check_user(conn, username, password):
-    """Check if a user exists with the given username and password."""
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-        return cursor.fetchone()
-    except sqlite3.Error as e:
-        print(f"Error checking user: {e}")
-        return None
-        
-def add_user(conn, username, password, role="viewer"):
-    try:
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, password, role))
-        conn.commit()
-        print(f"[DB] User '{username}' added successfully with role '{role}'.")
-    except sqlite3.IntegrityError:
-        print(f"[DB ERROR] Username '{username}' already exists.")
-    except sqlite3.Error as e:
-        print(f"[DB ERROR] Failed to add user: {e}")
+# === USER FUNCTIONS ===
 
 def create_user_table(conn):
     query = """
@@ -52,6 +33,37 @@ def create_user_table(conn):
     );
     """
     execute_query(conn, query, "User table creation")
+
+def check_user(conn, username, password):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+        return cursor.fetchone()
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] check_user: {e}")
+        return None
+
+def add_user(conn, username, password, role="viewer"):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, password, role))
+        conn.commit()
+        print(f"[DB] User '{username}' added successfully with role '{role}'.")
+    except sqlite3.IntegrityError:
+        print(f"[DB ERROR] Username '{username}' already exists.")
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] Failed to add user: {e}")
+
+def get_user_by_username(conn, username):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        return cursor.fetchone()
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] get_user_by_username: {e}")
+        return None
+
+# === WORKSPACE FUNCTIONS ===
 
 def create_workspace_table(conn):
     query = """
@@ -70,6 +82,46 @@ def create_workspace_table(conn):
     );
     """
     execute_query(conn, query, "Workspace tables creation")
+
+def create_workspace(conn, name):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO workspaces (name) VALUES (?)", (name,))
+        conn.commit()
+        return cursor.lastrowid
+    except sqlite3.IntegrityError:
+        print(f"[DB ERROR] Workspace '{name}' already exists.")
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] Failed to create workspace: {e}")
+    return None
+
+def add_user_to_workspace(conn, user_id, workspace_id, role="editor"):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT OR IGNORE INTO user_workspace (user_id, workspace_id, role)
+            VALUES (?, ?, ?)
+        """, (user_id, workspace_id, role))
+        conn.commit()
+        print(f"[DB] User {user_id} added to workspace {workspace_id} as {role}")
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] Failed to add user to workspace: {e}")
+
+def get_user_workspaces(conn, user_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT w.id, w.name, uw.role 
+            FROM workspaces w
+            JOIN user_workspace uw ON w.id = uw.workspace_id
+            WHERE uw.user_id = ?
+        """, (user_id,))
+        return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] get_user_workspaces: {e}")
+        return []
+
+# === DASHBOARD TABLES ===
 
 def create_dashboard_tables(conn):
     query = """
@@ -95,6 +147,8 @@ def create_dashboard_tables(conn):
     """
     execute_query(conn, query, "Dashboard and elements tables creation")
 
+# === SHARING & VERSION HISTORY ===
+
 def create_dashboard_sharing_and_history(conn):
     query = """
     CREATE TABLE IF NOT EXISTS dashboard_shares (
@@ -117,6 +171,8 @@ def create_dashboard_sharing_and_history(conn):
     """
     execute_query(conn, query, "Sharing & history tables creation")
 
+# === COMMENTS ===
+
 def create_comments_table(conn):
     query = """
     CREATE TABLE IF NOT EXISTS comments (
@@ -130,6 +186,8 @@ def create_comments_table(conn):
     );
     """
     execute_query(conn, query, "Comments table creation")
+
+# === INIT ===
 
 def initialize_database(conn):
     print("[DB INIT] Initializing all required tables...")
