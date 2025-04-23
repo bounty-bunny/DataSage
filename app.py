@@ -150,7 +150,7 @@ else:
                     st.components.v1.html(f.read(), height=800, scrolling=True)
 
     elif menu == "Dashboard":
-    st.subheader("📈 Visual Dashboard")
+        st.subheader("📈 Visual Dashboard")
 
     if "df" in st.session_state:
         df = st.session_state.df
