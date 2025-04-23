@@ -69,6 +69,7 @@ if not st.session_state.authenticated:
 else:
     st.sidebar.title("📂 Data Menu")
     menu = st.sidebar.radio("Choose Option", ["Upload File", "Connect SQL", "Data Insights", "Dashboard"])
+    
     if "df" not in st.session_state:
         st.session_state.df = None
 
@@ -151,9 +152,7 @@ else:
 
     elif menu == "Dashboard":
         st.subheader("📈 Visual Dashboard")
-
-    if "df" in st.session_state:
-        df = st.session_state.df
+        df = st.session_state.df if "df" in st.session_state and not st.session_state.df.empty else create_sample_data()
 
         if df is not None and not df.empty:
             cols = st.multiselect("Select Columns", df.columns.tolist(), default=df.columns.tolist())
@@ -182,5 +181,3 @@ else:
                 st.plotly_chart(fig)
         else:
             st.warning("The dataset is empty or invalid.")
-    else:
-        st.warning("Please upload or connect to a dataset first.")
