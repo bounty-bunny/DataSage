@@ -156,7 +156,7 @@ else:
     if df is not None and not df.empty:
         cols = st.multiselect("Select Columns", df.columns.tolist(), default=df.columns.tolist())
         chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Pie", "Scatter"])
-        
+
         if chart_type == "Bar":
             for col in cols:
                 if df[col].dtype in ['int64', 'float64']:
