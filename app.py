@@ -46,7 +46,7 @@ def login():
     password = st.text_input("Password", type="password", key="login_password")
 
     if st.button("Login", key="login_button"):
-        user = check_user(conn, username)
+        user = check_user(conn, username, password)
         if user and user[2] == password:
             st.session_state.authenticated = True
             st.success("Logged in successfully!")
