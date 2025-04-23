@@ -21,6 +21,16 @@ def execute_query(conn, query, description):
     except sqlite3.Error as e:
         print(f"[DB ERROR] {description} - {e}")
 
+def check_user(conn, username, password):
+    """Check if a user exists with the given username and password."""
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+        return cursor.fetchone()
+    except sqlite3.Error as e:
+        print(f"Error checking user: {e}")
+        return None
+
 def create_user_table(conn):
     query = """
     CREATE TABLE IF NOT EXISTS users (
