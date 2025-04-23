@@ -150,8 +150,8 @@ else:
                     st.components.v1.html(f.read(), height=800, scrolling=True)
 
     elif menu == "Dashboard":
-    st.subheader("📈 Visual Dashboard")
-    df = st.session_state.df
+        st.subheader("📈 Visual Dashboard")
+        df = st.session_state.df
 
     if df is not None and not df.empty:
         cols = st.multiselect("Select Columns", df.columns.tolist(), default=df.columns.tolist())
