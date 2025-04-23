@@ -4,7 +4,7 @@ import numpy as np
 import plotly.express as px
 import sweetviz as sv
 import sqlite3
-from db import create_connection, initialize_database, add_user, check_user
+from db import create_connection, initialize_database, add_user, check_user_v2
 
 DB_PATH = 'your_database.db'
 
