@@ -139,7 +139,7 @@ else:
 
     elif menu == "Data Insights":
         st.subheader("📊 Sweetviz Report")
-        df = st.session_state.df or create_sample_data()
+        df = st.session_state.df if "df" in st.session_state and not st.session_state.df.empty else create_sample_data()
         st.session_state.df = df
         columns = st.multiselect("Choose columns", df.columns)
         if st.button("Generate Report"):
