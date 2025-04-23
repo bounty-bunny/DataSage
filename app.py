@@ -4,7 +4,7 @@ import numpy as np
 import plotly.express as px
 import sweetviz as sv
 import sqlite3
-from db import create_connection, create_user_table, check_user, add_user
+from db import create_connection, initialize_database, check_user, add_user
 
 # Initialize session state variables if they don't exist
 if 'form_mode' not in st.session_state:
@@ -13,6 +13,7 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 # Helper functions for Sign Up and Login
+
 def sign_up():
     with st.container():
         st.markdown("<h2 style='text-align: center;'>Sign Up</h2>", unsafe_allow_html=True)
@@ -23,19 +24,19 @@ def sign_up():
         if password != confirm_password:
             st.error("Passwords do not match.")
         elif st.button("Sign Up", key="signup_button"):
-            conn = create_connection('your_database.db')  # Ensure correct database path
+            conn = create_connection('your_database.db')  # Set your DB path
             if conn:
-                create_user_table(conn)  # Ensure the table is created
+                initialize_database(conn)  # ✅ Create all tables
                 if check_user(conn, username):
                     st.error("Username already exists.")
                 else:
                     add_user(conn, username, password)
                     st.success("Account created successfully. Please log in.")
-                    st.session_state.form_mode = 'login'  # Switch to login mode
-                    st.experimental_rerun()  # Re-run the app to refresh
+                    st.session_state.form_mode = 'login'
+                    st.experimental_rerun()
             else:
                 st.error("Failed to connect to the database.")
-
+                
 def login():
     with st.container():
         st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
