@@ -152,7 +152,7 @@ else:
 
     elif menu == "Dashboard":
         st.subheader("📈 Visual Dashboard")
-        df = st.session_state.df if "df" in st.session_state and not st.session_state.df.empty else create_sample_data()
+        df = st.session_state.df if "df" in st.session_state and st.session_state.df is not None and not st.session_state.df.empty else create_sample_data()
 
         if df is not None and not df.empty:
             cols = st.multiselect("Select Columns", df.columns.tolist(), default=df.columns.tolist())
