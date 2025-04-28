@@ -151,7 +151,7 @@ else:
                     st.components.v1.html(f.read(), height=800, scrolling=True)
 
     elif menu == "Dashboard":
-    st.subheader("📈 Visual Dashboard")
+        st.subheader("📈 Visual Dashboard")
     
     # Setup
     conn = create_connection('your_database.db')
