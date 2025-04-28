@@ -151,33 +151,74 @@ else:
                     st.components.v1.html(f.read(), height=800, scrolling=True)
 
     elif menu == "Dashboard":
-        st.subheader("📈 Visual Dashboard")
-        df = st.session_state.df if "df" in st.session_state and st.session_state.df is not None and not st.session_state.df.empty else create_sample_data()
+    st.subheader("📈 Visual Dashboard")
+    
+    # Setup
+    conn = create_connection('your_database.db')
+    create_dashboard_table(conn)
+    
+    df = st.session_state.df if "df" in st.session_state else None
 
-        if df is not None and not df.empty:
-            cols = st.multiselect("Select Columns", df.columns.tolist(), default=df.columns.tolist())
+    if df is not None and not df.empty:
+        # Dashboard actions
+        action = st.radio("Action", ["Create New", "View Existing"])
+        
+        if action == "Create New":
+            dashboard_name = st.text_input("Dashboard Name")
+            cols = st.multiselect("Select Columns", df.columns.tolist())
             chart_type = st.selectbox("Chart Type", ["Bar", "Line", "Pie", "Scatter"])
-
-            if chart_type == "Bar":
-                for col in cols:
-                    if df[col].dtype in ['int64', 'float64']:
-                        fig = px.bar(df, x=col)
+            
+            if st.button("Save Dashboard"):
+                if dashboard_name and cols:
+                    user_id = st.session_state.get('user_id', 1)  # Default user_id 1 if not available
+                    save_dashboard(conn, user_id, dashboard_name, cols, chart_type)
+                    st.success(f"Dashboard '{dashboard_name}' saved!")
+                    st.experimental_rerun()
+                else:
+                    st.warning("Please provide a dashboard name and select columns.")
+        
+        elif action == "View Existing":
+            user_id = st.session_state.get('user_id', 1)
+            dashboards = get_dashboards(conn, user_id)
+            dashboard_map = {name: id for id, name in dashboards}
+            
+            selected_dashboard_name = st.selectbox("Select Dashboard", list(dashboard_map.keys()))
+            
+            if selected_dashboard_name:
+                dashboard_id = dashboard_map[selected_dashboard_name]
+                data = load_dashboard(conn, dashboard_id)
+                if data:
+                    dashboard_id, user_id, name, columns_json, chart_type, filters_json = data
+                    selected_cols = json.loads(columns_json)
+                    chart_type = chart_type
+                    
+                    st.success(f"Loaded Dashboard: {name}")
+                    
+                    # Render chart
+                    if chart_type == "Bar":
+                        for col in selected_cols:
+                            if df[col].dtype in ['int64', 'float64']:
+                                fig = px.bar(df, x=col)
+                                st.plotly_chart(fig)
+                    elif chart_type == "Line":
+                        for col in selected_cols:
+                            if df[col].dtype in ['int64', 'float64']:
+                                fig = px.line(df, y=col)
+                                st.plotly_chart(fig)
+                    elif chart_type == "Pie":
+                        for col in selected_cols:
+                            if df[col].dtype == "object":
+                                fig = px.pie(df, names=col)
+                                st.plotly_chart(fig)
+                    elif chart_type == "Scatter" and len(selected_cols) >= 2:
+                        fig = px.scatter(df, x=selected_cols[0], y=selected_cols[1])
                         st.plotly_chart(fig)
+                    
+                    # Delete option
+                    if st.button("Delete This Dashboard"):
+                        delete_dashboard(conn, dashboard_id)
+                        st.success("Dashboard deleted successfully!")
+                        st.experimental_rerun()
 
-            elif chart_type == "Line":
-                for col in cols:
-                    if df[col].dtype in ['int64', 'float64']:
-                        fig = px.line(df, y=col)
-                        st.plotly_chart(fig)
-
-            elif chart_type == "Pie":
-                for col in cols:
-                    if df[col].dtype == "object":
-                        fig = px.pie(df, names=col)
-                        st.plotly_chart(fig)
-
-            elif chart_type == "Scatter" and len(cols) == 2:
-                fig = px.scatter(df, x=cols[0], y=cols[1])
-                st.plotly_chart(fig)
-        else:
-            st.warning("The dataset is empty or invalid.")
+    else:
+        st.warning("Please upload or connect to a dataset first.")
