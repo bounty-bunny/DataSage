@@ -14,45 +14,51 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 # Sign Up Logic
+# Sign Up Logic
 def sign_up():
     st.markdown("### Sign Up")
     username = st.text_input("Create Username")
     password = st.text_input("Create Password", type="password")
     confirm_password = st.text_input("Confirm Password", type="password")
 
-    if password != confirm_password:
-        st.error("Passwords do not match.")
-    elif st.button("Sign Up"):
-        conn = create_connection('your_database.db')
-        if conn:
-            create_user_table(conn)
-            if check_user(conn, username):
-                st.error("Username already exists.")
-            else:
-                add_user(conn, username, password)
-                st.success("Account created. Please log in.")
-                st.session_state.form_mode = 'login'
-                st.experimental_rerun()
+    if st.button("Sign Up"):
+        if password != confirm_password:
+            st.error("Passwords do not match.")
         else:
-            st.error("DB connection failed.")
+            conn = create_connection('your_database.db')
+            if conn:
+                create_user_table(conn)
+                if get_user_by_username(conn, username):
+                    st.error("Username already exists.")
+                else:
+                    add_user(conn, username, password)
+                    st.success("Account created. Please log in.")
+                    st.session_state.form_mode = 'login'
+                    st.experimental_rerun()
+            else:
+                st.error("DB connection failed.")
 
 # Login Logic
 def login():
     st.markdown("### Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
 
-    if st.button("Login"):
-        conn = create_connection('your_database.db')
-        if conn:
-            user = check_user(conn, username, password)
-            if user and user[2] == password:
-                st.session_state.authenticated = True
-                st.success("Login successful.")
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Login")
+
+        if submitted:
+            conn = create_connection('your_database.db')
+            if conn:
+                user = check_user(conn, username, password)
+                if user and user[2] == password:
+                    st.session_state.authenticated = True
+                    st.success("Login successful.")
+                    st.experimental_rerun()  # rerun immediately after login
+                else:
+                    st.error("Incorrect username or password.")
             else:
-                st.error("Incorrect username or password.")
-        else:
-            st.error("DB connection failed.")
+                st.error("DB connection failed.")
 
 # Main Auth Flow
 if not st.session_state.authenticated:
