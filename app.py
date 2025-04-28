@@ -161,11 +161,12 @@ else:
     # Setup
     conn = create_connection('your_database.db')
     if conn:
-    create_user_table(conn)
-    create_workspace_table(conn)
-    create_dashboard_tables(conn)   # <-- Corrected here
-    create_dashboard_sharing_and_history(conn)
-    create_comments_table(conn)
+        create_user_table(conn)
+        create_workspace_table(conn)
+        create_dashboard_tables(conn)
+        create_dashboard_sharing_and_history(conn)
+        create_comments_table(conn)
+
     
     df = st.session_state.df if "df" in st.session_state else None
 
