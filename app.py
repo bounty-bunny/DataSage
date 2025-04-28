@@ -160,14 +160,13 @@ else:
     
     # Setup
     conn = create_connection('your_database.db')
-    if conn:
-        create_user_table(conn)
-        create_workspace_table(conn)
+    if conn:  # Ensure this line has the correct indentation
+        create_user_table(conn)  # This must be indented under the `if` condition
+        create_workspace_table(conn)  # Indented as part of the same block
         create_dashboard_tables(conn)
         create_dashboard_sharing_and_history(conn)
         create_comments_table(conn)
 
-    
     df = st.session_state.df if "df" in st.session_state else None
 
     if df is not None and not df.empty:
