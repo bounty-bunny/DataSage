@@ -5,7 +5,7 @@ import plotly.express as px
 import sweetviz as sv
 import sqlite3
 import sqlalchemy
-from db import create_connection, create_user_table, check_user, add_user
+from db import create_connection, create_user_table, add_user, check_user, get_user_by_username
 
 # Initialize session state
 if 'form_mode' not in st.session_state:
