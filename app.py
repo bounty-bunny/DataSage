@@ -14,7 +14,6 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 # Sign Up Logic
-# Sign Up Logic
 def sign_up():
     st.markdown("### Sign Up")
     username = st.text_input("Create Username")
