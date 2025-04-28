@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 def create_connection(db_file):
     """Create a database connection to the SQLite database."""
@@ -197,3 +198,56 @@ def initialize_database(conn):
     create_dashboard_sharing_and_history(conn)
     create_comments_table(conn)
     print("[DB INIT] Initialization complete.")
+
+def save_dashboard_element(conn, dashboard_id, element_type, element_data, settings_json=None):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO dashboard_elements (dashboard_id, element_type, element_data, settings_json)
+            VALUES (?, ?, ?, ?)
+        ''', (dashboard_id, element_type, json.dumps(element_data), json.dumps(settings_json) if settings_json else None))
+        conn.commit()
+        print(f"[DB] Dashboard element saved successfully.")
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] save_dashboard_element: {e}")
+
+def get_user_dashboards(conn, user_id, workspace_id=None):
+    try:
+        cursor = conn.cursor()
+        if workspace_id:
+            cursor.execute('''
+                SELECT id, name FROM dashboards 
+                WHERE user_id=? AND workspace_id=?
+            ''', (user_id, workspace_id))
+        else:
+            cursor.execute('''
+                SELECT id, name FROM dashboards 
+                WHERE user_id=?
+            ''', (user_id,))
+        return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] get_user_dashboards: {e}")
+        return []
+
+def get_dashboard_elements(conn, dashboard_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, element_type, element_data, settings_json
+            FROM dashboard_elements
+            WHERE dashboard_id=?
+        ''', (dashboard_id,))
+        return cursor.fetchall()
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] get_dashboard_elements: {e}")
+        return []
+
+#Dashboard
+def delete_dashboard(conn, dashboard_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM dashboards WHERE id=?', (dashboard_id,))
+        conn.commit()
+        print(f"[DB] Dashboard {dashboard_id} deleted successfully.")
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] delete_dashboard: {e}")
