@@ -20,8 +20,8 @@ def execute_query(conn, query, label=""):
         if label:
             print(f"{label} - Executed successfully.")
     except Exception as e:
-        print(f"Error executing {label}: {e}")
-        st.error(f"Database Error: {e}")
+        print(f"[DB ERROR] {label}: {e}")  # ✅ Use print, not st.error
+        # Optionally return False or raise an exception
 
 # === USER FUNCTIONS ===
 
