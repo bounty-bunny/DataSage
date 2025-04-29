@@ -8,6 +8,8 @@ import sqlalchemy
 from db import create_connection, create_user_table, add_user, check_user, get_user_by_username
 
 # Initialize session state
+if "auth_mode" not in st.session_state:
+    st.session_state.auth_mode = "login"  # default to login
 if "form_mode" not in st.session_state:
     st.session_state.form_mode = "login"
 if 'authenticated' not in st.session_state:
