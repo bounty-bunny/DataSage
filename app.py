@@ -15,7 +15,7 @@ from db import (
     add_user,
     check_user,
     get_user_by_username,
-    get_user_dashboards
+    get_dashboards,
 )
 
 # Initialize session state
