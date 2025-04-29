@@ -67,22 +67,26 @@ def get_user_by_username(conn, username):
 # === WORKSPACE FUNCTIONS ===
 
 def create_workspace_table(conn):
-    query = """
-    CREATE TABLE IF NOT EXISTS workspaces (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE
-    );
-
-    CREATE TABLE IF NOT EXISTS user_workspace (
-        user_id INTEGER,
-        workspace_id INTEGER,
-        role TEXT DEFAULT 'editor',
-        PRIMARY KEY(user_id, workspace_id),
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY(workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
-    );
-    """
-    execute_query(conn, query, "Workspace tables creation")
+    queries = [
+        """
+        CREATE TABLE IF NOT EXISTS workspaces (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+        );
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS user_workspace (
+            user_id INTEGER,
+            workspace_id INTEGER,
+            role TEXT DEFAULT 'editor',
+            PRIMARY KEY(user_id, workspace_id),
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY(workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+        );
+        """
+    ]
+    for query in queries:
+        execute_query(conn, query, "Workspace table creation")
 
 def create_workspace(conn, name):
     try:
