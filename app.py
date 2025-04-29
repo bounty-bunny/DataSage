@@ -100,7 +100,8 @@ else:
     sidebar_option = st.sidebar.selectbox("Choose Activity", [
         "📁 Data Manager", 
         "📈 Data Insights", 
-        "📊 Dashboard Manager"
+        "📊 Dashboard Manager",
+        "🚪 Logout"
     ])
 
     # ---------- FILE / DB UPLOAD ----------
@@ -227,10 +228,7 @@ else:
             st.warning("Upload or connect to a dataset first.")
 
     # ---------- LOGOUT ----------
-
-# Logout Button (Fixed Position at the Bottom)
-st.sidebar.markdown("----")
-if st.sidebar.button("🚪 Logout"):
-    st.session_state.authenticated = False
-    st.session_state.clear()
-    st.experimental_rerun()
+    elif sidebar_option == "🚪 Logout":
+        st.session_state.authenticated = False
+        st.session_state.clear()
+        st.experimental_rerun()
