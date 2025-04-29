@@ -264,3 +264,30 @@ def delete_dashboard(conn, dashboard_id):
         print(f"[DB] Dashboard {dashboard_id} deleted successfully.")
     except sqlite3.Error as e:
         print(f"[DB ERROR] delete_dashboard: {e}")
+
+# === Save a new dashboard ===
+def save_dashboard(conn, name, user_id, workspace_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO dashboards (name, user_id, workspace_id)
+            VALUES (?, ?, ?)
+        """, (name, user_id, workspace_id))
+        conn.commit()
+        print(f"[DB] Dashboard '{name}' saved successfully.")
+        return cursor.lastrowid
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] save_dashboard: {e}")
+        return None
+
+# === Load a single dashboard ===
+def load_dashboard(conn, dashboard_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM dashboards WHERE id=?
+        """, (dashboard_id,))
+        return cursor.fetchone()
+    except sqlite3.Error as e:
+        print(f"[DB ERROR] load_dashboard: {e}")
+        return None
