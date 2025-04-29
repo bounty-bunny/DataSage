@@ -15,7 +15,7 @@ from db import (
     add_user,
     check_user,
     get_user_by_username,
-    get_dashboards,
+    get_user_dashboards,
 )
 
 # Initialize session state
@@ -202,7 +202,7 @@ else:
         
         elif action == "View Existing":
             user_id = st.session_state.get('user_id', 1)
-            dashboards = get_dashboards(conn, user_id)
+            dashboards = get_user_dashboards(conn, user_id)
             dashboard_map = {name: id for id, name in dashboards}
             
             selected_dashboard_name = st.selectbox("Select Dashboard", list(dashboard_map.keys()))
