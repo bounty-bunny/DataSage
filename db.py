@@ -12,15 +12,16 @@ def create_connection(db_file):
         print(f"[DB ERROR] Connection failed: {e}")
         return None
 
-def execute_query(conn, query, description):
-    """Utility to execute SQL with logging."""
+def execute_query(conn, query, label=""):
     try:
         cursor = conn.cursor()
-        cursor.executescript(query)
+        cursor.execute(query)  # Make sure `query` is a SINGLE SQL statement
         conn.commit()
-        print(f"[DB] {description} - Success")
-    except sqlite3.Error as e:
-        print(f"[DB ERROR] {description} - {e}")
+        if label:
+            print(f"{label} - Executed successfully.")
+    except Exception as e:
+        print(f"Error executing {label}: {e}")
+        st.error(f"Database Error: {e}")
 
 # === USER FUNCTIONS ===
 
