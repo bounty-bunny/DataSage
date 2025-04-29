@@ -1,6 +1,5 @@
 import sqlite3
 import json
-import streamlit as st
 
 def create_connection(db_file):
     try:
@@ -20,8 +19,7 @@ def execute_query(conn, query, label=""):
         if label:
             print(f"{label} - Executed successfully.")
     except Exception as e:
-        print(f"[DB ERROR] {label}: {e}")  # ✅ Use print, not st.error
-        # Optionally return False or raise an exception
+        print(f"[DB ERROR] {label}: {e}")
 
 # === USER FUNCTIONS ===
 
@@ -90,7 +88,6 @@ def create_workspace_table(conn):
         print("[DB] Workspace tables created.")
     except Exception as e:
         print(f"[DB ERROR] create_workspace_table: {e}")
-        st.error(f"Database Error: {e}")
 
 def create_workspace(conn, name):
     try:
@@ -265,7 +262,6 @@ def delete_dashboard(conn, dashboard_id):
     except sqlite3.Error as e:
         print(f"[DB ERROR] delete_dashboard: {e}")
 
-# === Save a new dashboard ===
 def save_dashboard(conn, name, user_id, workspace_id):
     try:
         cursor = conn.cursor()
@@ -280,7 +276,6 @@ def save_dashboard(conn, name, user_id, workspace_id):
         print(f"[DB ERROR] save_dashboard: {e}")
         return None
 
-# === Load a single dashboard ===
 def load_dashboard(conn, dashboard_id):
     try:
         cursor = conn.cursor()
