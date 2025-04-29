@@ -71,6 +71,13 @@ def login():
                 else:
                     st.error("Incorrect credentials.")
 
+# Logout Button (Fixed Position at the Bottom)
+st.sidebar.markdown("----")
+if st.sidebar.button("🚪 Logout"):
+    st.session_state.authenticated = False
+    st.session_state.clear()
+    st.experimental_rerun()
+
 # ------------------ MAIN APP ------------------
 
 if not st.session_state.authenticated:
