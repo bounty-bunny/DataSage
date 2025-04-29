@@ -1,11 +1,11 @@
 import sqlite3
 import json
+import streamlit as st
 
 def create_connection(db_file):
-    """Create a database connection to the SQLite database."""
     try:
         conn = sqlite3.connect(db_file, check_same_thread=False)
-        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
+        conn.execute("PRAGMA foreign_keys = ON")
         print(f"[DB] Connected to {db_file} successfully")
         return conn
     except sqlite3.Error as e:
@@ -15,7 +15,7 @@ def create_connection(db_file):
 def execute_query(conn, query, label=""):
     try:
         cursor = conn.cursor()
-        cursor.execute(query)  # Make sure `query` is a SINGLE SQL statement
+        cursor.execute(query)
         conn.commit()
         if label:
             print(f"{label} - Executed successfully.")
@@ -85,10 +85,12 @@ def create_workspace_table(conn):
     """
     try:
         cursor = conn.cursor()
-        cursor.executescript(query)  # Use executescript instead of execute
+        cursor.executescript(query)
         conn.commit()
+        print("[DB] Workspace tables created.")
     except Exception as e:
-        st.error(f"Error in create_workspace_table: {e}")
+        print(f"[DB ERROR] create_workspace_table: {e}")
+        st.error(f"Database Error: {e}")
 
 def create_workspace(conn, name):
     try:
@@ -131,7 +133,7 @@ def get_user_workspaces(conn, user_id):
 # === DASHBOARD TABLES ===
 
 def create_dashboard_tables(conn):
-    query = """
+    query1 = """
     CREATE TABLE IF NOT EXISTS dashboards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -141,7 +143,8 @@ def create_dashboard_tables(conn):
         FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL,
         FOREIGN KEY(workspace_id) REFERENCES workspaces(id) ON DELETE SET NULL
     );
-
+    """
+    query2 = """
     CREATE TABLE IF NOT EXISTS dashboard_elements (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         dashboard_id INTEGER,
@@ -152,12 +155,13 @@ def create_dashboard_tables(conn):
         FOREIGN KEY(dashboard_id) REFERENCES dashboards(id) ON DELETE CASCADE
     );
     """
-    execute_query(conn, query, "Dashboard and elements tables creation")
+    execute_query(conn, query1, "Dashboard table creation")
+    execute_query(conn, query2, "Dashboard elements table creation")
 
 # === SHARING & VERSION HISTORY ===
 
 def create_dashboard_sharing_and_history(conn):
-    query = """
+    query1 = """
     CREATE TABLE IF NOT EXISTS dashboard_shares (
         dashboard_id INTEGER,
         shared_with_user_id INTEGER,
@@ -166,7 +170,8 @@ def create_dashboard_sharing_and_history(conn):
         FOREIGN KEY(dashboard_id) REFERENCES dashboards(id) ON DELETE CASCADE,
         FOREIGN KEY(shared_with_user_id) REFERENCES users(id) ON DELETE CASCADE
     );
-
+    """
+    query2 = """
     CREATE TABLE IF NOT EXISTS dashboard_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         dashboard_id INTEGER,
@@ -176,7 +181,8 @@ def create_dashboard_sharing_and_history(conn):
         FOREIGN KEY(dashboard_id) REFERENCES dashboards(id) ON DELETE CASCADE
     );
     """
-    execute_query(conn, query, "Sharing & history tables creation")
+    execute_query(conn, query1, "Dashboard shares table creation")
+    execute_query(conn, query2, "Dashboard history table creation")
 
 # === COMMENTS ===
 
@@ -204,6 +210,8 @@ def initialize_database(conn):
     create_dashboard_sharing_and_history(conn)
     create_comments_table(conn)
     print("[DB INIT] Initialization complete.")
+
+# === DASHBOARD OPERATIONS ===
 
 def save_dashboard_element(conn, dashboard_id, element_type, element_data, settings_json=None):
     try:
@@ -248,7 +256,6 @@ def get_dashboard_elements(conn, dashboard_id):
         print(f"[DB ERROR] get_dashboard_elements: {e}")
         return []
 
-#Dashboard
 def delete_dashboard(conn, dashboard_id):
     try:
         cursor = conn.cursor()
