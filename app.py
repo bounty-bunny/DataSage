@@ -5,14 +5,17 @@ import plotly.express as px
 import sweetviz as sv
 import sqlite3
 import sqlalchemy
-from db import create_connection, initialize_database
-
-# Initialize DB
-conn = create_connection('your_database.db')
-if conn:
-    initialize_database(conn)
-else:
-    st.error("Failed to connect to the database.")
+from db import (
+    create_connection,
+    create_user_table,
+    create_workspace_table,
+    create_dashboard_tables,
+    create_dashboard_sharing_and_history,
+    create_comments_table,
+    add_user,
+    check_user,
+    get_user_by_username,
+)
 
 # Initialize session state
 if "auth_mode" not in st.session_state:
