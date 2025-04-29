@@ -18,13 +18,96 @@ from db import (
     get_user_dashboards,
 )
 
-# Sidebar with Accordion (Dropdown Style) Navigation
-def sidebar_navigation():
+# After all your imports and db functions
+st.set_page_config(page_title="DataSage", layout="wide")
+
+# Initialize session state
+if "auth_mode" not in st.session_state:
+    st.session_state.auth_mode = "login"
+if "form_mode" not in st.session_state:
+    st.session_state.form_mode = "login"
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+# ------------------ AUTH SECTION ------------------
+
+# Sign Up Logic
+def sign_up():
+    st.markdown("### Sign Up")
+    username = st.text_input("Create Username")
+    password = st.text_input("Create Password", type="password")
+    confirm_password = st.text_input("Confirm Password", type="password")
+    if st.button("Sign Up"):
+        if password != confirm_password:
+            st.error("Passwords do not match.")
+        else:
+            conn = create_connection('your_database.db')
+            if conn:
+                create_user_table(conn)
+                if get_user_by_username(conn, username):
+                    st.error("Username already exists.")
+                else:
+                    add_user(conn, username, password)
+                    st.success("Account created. Please log in.")
+                    st.session_state.form_mode = 'login'
+                    st.experimental_rerun()
+
+# Login Logic
+def login():
+    st.markdown("### Login")
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Login")
+        if submitted:
+            conn = create_connection('your_database.db')
+            if conn:
+                user = check_user(conn, username, password)
+                if user and user[2] == password:
+                    st.session_state.authenticated = True
+                    st.session_state.username = username
+                    st.session_state.user_id = user[0]
+                    st.experimental_rerun()
+                else:
+                    st.error("Incorrect credentials.")
+
+# ------------------ MAIN APP ------------------
+
+if not st.session_state.authenticated:
+    if st.session_state.form_mode == 'login':
+        login()
+        if st.button("Don't have an account? Sign Up"):
+            st.session_state.form_mode = 'signup'
+            st.experimental_rerun()
+    else:
+        sign_up()
+        if st.button("Already have an account? Login"):
+            st.session_state.form_mode = 'login'
+            st.experimental_rerun()
+else:
+    # ---------- DATABASE INITIALIZATION ----------
+    conn = create_connection('your_database.db')
+    if conn:
+        create_user_table(conn)
+        create_workspace_table(conn)
+        create_dashboard_tables(conn)
+        create_dashboard_sharing_and_history(conn)
+        create_comments_table(conn)
+
+    # ---------- SIDEBAR STRUCTURE ----------
+    st.sidebar.image("https://img.icons8.com/external-flat-juicy-fish/64/data-analytics.png", width=40)
     st.sidebar.title("📊 DataSage")
-    
-    # Data Manager Section
-    with st.sidebar.expander("📁 Data Manager", expanded=True):
-        menu = st.radio("Choose Source", ["Upload File", "Connect SQL"], key="data_source", horizontal=True)
+    sidebar_option = st.sidebar.selectbox("Choose Activity", [
+        "📁 Data Manager", 
+        "📈 Data Insights", 
+        "📊 Dashboard Manager",
+        "🚪 Logout"
+    ])
+
+    # ---------- FILE / DB UPLOAD ----------
+    if sidebar_option == "📁 Data Manager":
+        st.subheader("📁 Upload or Connect Data")
+        menu = st.radio("Source", ["Upload File", "Connect SQL"], horizontal=True)
 
         if menu == "Upload File":
             uploaded_file = st.file_uploader("Upload CSV or Excel", type=["csv", "xlsx"])
@@ -36,6 +119,7 @@ def sidebar_navigation():
                     st.dataframe(df)
                 except Exception as e:
                     st.error(f"Error: {e}")
+
         elif menu == "Connect SQL":
             db_type = st.selectbox("DB Type", ["PostgreSQL", "MySQL", "SQLite"])
             if db_type == "SQLite":
@@ -77,8 +161,8 @@ def sidebar_navigation():
                     except Exception as e:
                         st.error(f"Connection failed: {e}")
 
-    # Data Insights Section
-    with st.sidebar.expander("📈 Data Insights", expanded=False):
+    # ---------- SWEETVIZ REPORT ----------
+    elif sidebar_option == "📈 Data Insights":
         st.subheader("📊 Sweetviz Report")
         df = st.session_state.df if "df" in st.session_state else None
         if df is not None:
@@ -92,8 +176,8 @@ def sidebar_navigation():
         else:
             st.warning("Upload or connect to a dataset first.")
 
-    # Dashboard Manager Section
-    with st.sidebar.expander("📊 Dashboard Manager", expanded=False):
+    # ---------- DASHBOARD MANAGER ----------
+    elif sidebar_option == "📊 Dashboard Manager":
         st.subheader("📊 Visual Dashboard")
         df = st.session_state.df if "df" in st.session_state else None
         if df is not None and not df.empty:
@@ -143,25 +227,8 @@ def sidebar_navigation():
         else:
             st.warning("Upload or connect to a dataset first.")
 
-    # Logout Button (Fixed Position at the Bottom)
-    st.sidebar.markdown("----")
-    if st.sidebar.button("🚪 Logout"):
+    # ---------- LOGOUT ----------
+    elif sidebar_option == "🚪 Logout":
         st.session_state.authenticated = False
         st.session_state.clear()
         st.experimental_rerun()
-
-# ------------------ MAIN APP ------------------
-
-if not st.session_state.authenticated:
-    if st.session_state.form_mode == 'login':
-        login()
-        if st.button("Don't have an account? Sign Up"):
-            st.session_state.form_mode = 'signup'
-            st.experimental_rerun()
-    else:
-        sign_up()
-        if st.button("Already have an account? Login"):
-            st.session_state.form_mode = 'login'
-            st.experimental_rerun()
-else:
-    sidebar_navigation()
