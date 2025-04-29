@@ -7,6 +7,13 @@ import sqlite3
 import sqlalchemy
 from db import create_connection, initialize_database
 
+# Initialize DB
+conn = create_connection('your_database.db')
+if conn:
+    initialize_database(conn)
+else:
+    st.error("Failed to connect to the database.")
+
 # Initialize session state
 if "auth_mode" not in st.session_state:
     st.session_state.auth_mode = "login"  # default to login
