@@ -32,7 +32,10 @@ if "authenticated" not in st.session_state:
 if "menu" not in st.session_state:
     st.session_state.menu = "📁 Data Manager"
 if "theme" not in st.session_state:
-    st.session_state.theme = "Light"
+    st.session_state.theme = "Dark"  # Default theme
+
+apply_custom_theme(st.session_state.theme)
+
 
 # ---- AUTH ----
 def sign_up():
