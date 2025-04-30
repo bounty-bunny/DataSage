@@ -96,22 +96,22 @@ else:
         create_comments_table(conn)
 
     # ---- TOP RIGHT PROFILE MENU ----
-    col1, col2 = st.columns([8, 1])
-    with col2:
-        profile_menu = st.selectbox(
-            "⚙️",
-            ["Profile", "Toggle Theme", "Logout"],
-            label_visibility="collapsed"
-        )
+col1, col2 = st.columns([8, 1])
+with col2:
+    profile_menu = st.selectbox(
+        "⚙️",
+        ["Profile", "Toggle Theme", "Logout"],
+        label_visibility="collapsed"
+    )
 
-        if profile_menu == "Logout":
+    if profile_menu == "Logout":
         st.session_state.clear()
         st.experimental_rerun()
-        elif profile_menu == "Toggle Theme":
-            st.session_state.theme = (
-             "dark" if st.session_state.theme == "light" else "light"
-            )
-            st.experimental_rerun()
+    elif profile_menu == "Toggle Theme":
+        st.session_state.theme = (
+            "dark" if st.session_state.theme == "light" else "light"
+        )
+        st.experimental_rerun()
 
     # ---- SIDEBAR ----
     st.sidebar.image("https://img.icons8.com/external-flat-juicy-fish/64/data-analytics.png", width=40)
