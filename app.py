@@ -145,7 +145,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Handle profile menu logic
-import streamlit as st
 if "menu_option" in st.session_state:
     if st.session_state.menu_option == "logout":
         st.session_state.clear()
