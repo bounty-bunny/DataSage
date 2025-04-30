@@ -96,23 +96,62 @@ else:
         create_dashboard_sharing_and_history(conn)
         create_comments_table(conn)
 
-    # ---- TOP RIGHT PROFILE MENU ----
-    col1, col2 = st.columns([8, 1])
-    with col2:
-        profile_menu = st.selectbox(
-            "⚙️",
-            ["Profile", "Toggle Theme", "Logout"],
-            label_visibility="collapsed"
-        )
-    
-        if profile_menu == "Logout":
-            st.session_state.clear()
-            st.experimental_rerun()
-        elif profile_menu == "Toggle Theme":
-            st.session_state.theme = (
-                "dark" if st.session_state.theme == "light" else "light"
-            )
-            st.experimental_rerun()
+# Custom HTML/CSS-based profile menu in the top right
+st.markdown("""
+    <style>
+    .profile-menu-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-top: -80px;
+        margin-bottom: 10px;
+    }
+    .profile-menu {
+        background-color: #f0f2f6;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        position: absolute;
+        right: 20px;
+        top: 60px;
+        z-index: 999;
+    }
+    .profile-menu button {
+        background: none;
+        border: none;
+        padding: 5px 10px;
+        font-size: 14px;
+        width: 100%;
+        text-align: left;
+    }
+    .profile-avatar {
+        cursor: pointer;
+        font-size: 20px;
+        border: none;
+        background: none;
+    }
+    </style>
+
+    <div class="profile-menu-container">
+        <button class="profile-avatar" onclick="document.getElementById('profileMenu').style.display = 
+            document.getElementById('profileMenu').style.display === 'block' ? 'none' : 'block';">⚙️</button>
+        <div id="profileMenu" class="profile-menu" style="display: none;">
+            <form action="" method="post">
+                <button name="menu_option" value="profile">👤 Profile</button>
+                <button name="menu_option" value="logout">🚪 Logout</button>
+            </form>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
+# Handle profile menu logic
+import streamlit as st
+if "menu_option" in st.session_state:
+    if st.session_state.menu_option == "logout":
+        st.session_state.clear()
+        st.experimental_rerun()
+    elif st.session_state.menu_option == "profile":
+        st.info("Profile section coming soon!")
 
     # ---- SIDEBAR ----
     st.sidebar.image("https://img.icons8.com/external-flat-juicy-fish/64/data-analytics.png", width=40)
