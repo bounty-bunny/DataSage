@@ -34,9 +34,6 @@ if "menu" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "Dark"  # Default theme
 
-apply_custom_theme(st.session_state.theme)
-
-
 # ---- AUTH ----
 def sign_up():
     st.markdown("### Sign Up")
