@@ -100,17 +100,18 @@ else:
     with col2:
         profile_menu = st.selectbox(
             "⚙️",
-            ["Profile", "Light Theme", "Dark Theme", "Logout"],
+            ["Profile", "Toggle Theme", "Logout"],
             label_visibility="collapsed"
         )
 
         if profile_menu == "Logout":
-            st.session_state.clear()
+        st.session_state.clear()
+        st.experimental_rerun()
+        elif profile_menu == "Toggle Theme":
+            st.session_state.theme = (
+             "dark" if st.session_state.theme == "light" else "light"
+            )
             st.experimental_rerun()
-        elif profile_menu == "Dark Theme":
-            st.session_state.theme = "Dark"
-        elif profile_menu == "Light Theme":
-            st.session_state.theme = "Light"
 
     # ---- SIDEBAR ----
     st.sidebar.image("https://img.icons8.com/external-flat-juicy-fish/64/data-analytics.png", width=40)
